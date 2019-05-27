@@ -1,10 +1,40 @@
-mod math;
+extern crate sdl2;
 
-fn main() {
-    let camera_position = math::vec3::Vector3{x:2, y:2, z: 5};
-    let camera_position2 = math::vec3::Vector3{x:2, y:1, z: 15};
+use sdl2::pixels::Color;
+use sdl2::event::Event;
+use sdl2::keyboard::Keycode;
+use std::time::Duration;
 
-    let t = camera_position.dot(camera_position2);
+pub fn main() -> Result<(), String> {
+    let sdl_context = sdl2::init()?;
+    let video_subsystem = sdl_context.video()?;
 
-    println!("{}", t);
+    let window = video_subsystem.window("rust-sdl2 demo: Video", 800, 600)
+        .position_centered()
+        .opengl()
+        .build()
+        .map_err(|e| e.to_string())?;
+
+    let mut canvas = window.into_canvas().build().map_err(|e| e.to_string())?;
+
+    canvas.set_draw_color(Color::RGB(255, 0, 0));
+    canvas.clear();
+    canvas.present();
+
+    let mut event_pump = sdl_context.event_pump()?;
+
+    'running: loop {
+        for event in event_pump.poll_iter() {
+            match event {
+                Event::Quit {..} | Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
+                    break 'running
+                },
+                _ => {}
+            }
+        }
+        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
+        // The rest of the game loop goes here...
+    }
+
+    Ok(())
 }

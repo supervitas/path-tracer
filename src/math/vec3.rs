@@ -1,6 +1,7 @@
 use std::fmt;
 use std::ops::{Mul, Add};
 
+#[derive(Debug)]
 pub struct Vector3 <T: Copy> {
     pub x: T,
     pub y: T,
