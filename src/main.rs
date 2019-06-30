@@ -8,12 +8,18 @@ use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
+use crate::primitives::renderable::Renderable;
+use crate::primitives::cube::Cube;
 
 mod math;
 mod gl;
+mod primitives;
 
 pub fn main() {
     let camera_position = math::vec3::Vector3{x:0, y:0, z: 15};
+    let mut cube: Cube = Cube::new();
+
+
 
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
@@ -34,7 +40,6 @@ pub fn main() {
     let texture_creator = canvas.texture_creator();
 
     let mut renderer = gl::renderer::Renderer::new(width, height, &texture_creator).unwrap();
-
     let mut event_pump = sdl_context.event_pump().map_err(|e| e.to_string()).unwrap();
 
     'running: loop {
