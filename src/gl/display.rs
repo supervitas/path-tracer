@@ -13,24 +13,24 @@ use sdl2::render::{Texture, Canvas, TextureCreator};
 use sdl2::mouse::SystemCursor::No;
 
 
-pub struct Renderer<'a> {
+pub struct Display<'a> {
     width: u32,
     height: u32,
     texture: Texture<'a>,
 }
 
-impl<'a> Renderer <'a>{
-     pub fn new(width: u32, height: u32, texture_creator: &'a TextureCreator<WindowContext>) -> Result<Renderer, String> {
+impl<'a> Display <'a>{
+     pub fn new(width: u32, height: u32, texture_creator: &'a TextureCreator<WindowContext>) -> Result<Display, String> {
          let texture = texture_creator.create_texture_streaming(PixelFormatEnum::IYUV, width, height)
              .map_err(|e| e.to_string()).unwrap();
 
-         let renderer = Renderer {
+         let display = Display {
              width,
              height,
              texture
          };
 
-        Ok(renderer)
+        Ok(display)
     }
 
     fn random_texture(&mut self) {
@@ -71,7 +71,7 @@ impl<'a> Renderer <'a>{
     }
 
 
-    pub fn render (&mut self, canvas: &mut Canvas<Window>) -> Result<(), String> {
+    pub fn show (&mut self, canvas: &mut Canvas<Window>) -> Result<(), String> {
         self.random_texture();
         canvas.clear();
         canvas.copy(&self.texture, None, Some(Rect::new(0, 0, self.width, self.height)))?;

@@ -39,7 +39,7 @@ pub fn main() {
 
     let texture_creator = canvas.texture_creator();
 
-    let mut renderer = gl::renderer::Renderer::new(width, height, &texture_creator).unwrap();
+    let mut display = gl::display::Display::new(width, height, &texture_creator).unwrap();
     let mut event_pump = sdl_context.event_pump().map_err(|e| e.to_string()).unwrap();
 
     'running: loop {
@@ -51,8 +51,6 @@ pub fn main() {
             }
         }
 
-        renderer.render(&mut canvas);
-
+        display.show(&mut canvas);
     }
-//    renderer.run();
 }
