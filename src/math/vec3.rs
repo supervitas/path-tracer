@@ -14,6 +14,12 @@ pub struct Vector3 <T: Copy> {
 //    }
 //}
 
+//impl <S> Vector3 <S> {
+//    pub fn new() {
+//
+//    }
+//}
+
 impl<S> Vector3<S> where S: Into<f64> + Copy {
     pub fn dot<U>(&self, v2: Vector3<U>) -> f64 where U: Into<f64> + Copy {
         self.x.into() * v2.x.into() + self.y.into() * v2.y.into() + self.z.into() * v2.z.into()
