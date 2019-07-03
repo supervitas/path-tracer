@@ -11,6 +11,7 @@ use sdl2::keyboard::Keycode;
 use crate::primitives::renderable::Renderable;
 use crate::primitives::cube::Cube;
 use crate::math::vec3::Vector3;
+use crate::renderer::camera::Camera;
 
 mod math;
 mod gl;
@@ -18,11 +19,11 @@ mod primitives;
 mod renderer;
 
 pub fn main() {
-    let camera_position = math::vec3::Vector3{x:0, y:0, z: 15};
-    let mut cube: Cube = Cube::new();
-
     let mut scene = renderer::scene::Scene::new(Vector3{x: 0.5, y: 0.1, z: 0.3});
+    let mut cube: Cube = Cube::new();
     scene.add_renderable(Box::new(cube));
+
+    let camera = Camera::new(65f32, 0.1, 1000f32, Vector3::new(0.,0.,15.), Vector3::new(0.,0.,1.));
 
 
     let sdl_context = sdl2::init().unwrap();

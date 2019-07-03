@@ -7,7 +7,7 @@ pub struct Scene {
 }
 
 impl Scene {
-    pub fn new(background: Vector3<f32>) -> Scene {
+    pub fn new(background: Vector3<f32>) -> Self {
       Scene {
           background,
           renderables: Vec::new(),
