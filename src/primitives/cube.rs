@@ -1,5 +1,6 @@
 use crate::math;
 use crate::primitives::renderable::Renderable;
+use crate::math::ray::Ray;
 
 pub struct Cube {
     width: f64,
@@ -18,7 +19,7 @@ impl Renderable for Cube {
         }
     }
 
-    fn intersects(&self) -> bool {
-        true
+    fn intersects(&self, ray: &Ray) -> bool {
+        return false;
     }
 }

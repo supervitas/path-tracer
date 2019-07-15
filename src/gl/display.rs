@@ -33,46 +33,29 @@ impl<'a> Display <'a>{
         Ok(display)
     }
 
-    fn random_texture(&mut self) {
-        let w = self.width as usize;
-        let h = self.height as usize;
+    fn write_image_to_texture(&mut self, image: &Vec<u8>) {
+        let width = self.width as usize;
+        let height = self.height as usize;
 
         self.texture.with_lock(None, |buffer: &mut [u8], pitch: usize| {
-            // `pitch` is the width of the Y component
-            // The U and V components are half the width and height of Y
+            let y_size = pitch*height;
 
-            // Set Y (constant)
-            for y in 0..h {
-                for x in 0..w {
-                    let offset = y*pitch + x;
-                    buffer[offset] = 128;
-                }
-            }
+            for x in 0..width {
+                for y in 0..height {
+                    let offset = x * width + y;
 
-            let y_size = pitch*h;
-
-            let mut rng = rand::thread_rng();
-
-
-            // Set U and V (X and Y)
-            for y in 0..h/2 {
-                for x in 0..w/2 {
-                    let u_offset = y_size + y*pitch/2 + x;
-                    let v_offset = y_size + (pitch/2 * h/2) + y*pitch/2 + x;
-
-                    let n1: u8 = rng.gen();
-                    let n2: u8 = rng.gen();
-
-                    buffer[u_offset] = n1;
-                    buffer[v_offset] = n2;
+                    buffer[offset] = image[offset];
+                    buffer[offset + 1] = image[offset + 1];
+                    buffer[offset + 2] = image[offset + 2];
                 }
             }
         }).unwrap();
     }
 
 
-    pub fn show (&mut self, canvas: &mut Canvas<Window>) -> Result<(), String> {
-        self.random_texture();
+    pub fn show (&mut self, canvas: &mut Canvas<Window>, image: &Vec<u8>) -> Result<(), String> {
+        self.write_image_to_texture(&image);
+
         canvas.clear();
         canvas.copy(&self.texture, None, Some(Rect::new(0, 0, self.width, self.height)))?;
         canvas.present();

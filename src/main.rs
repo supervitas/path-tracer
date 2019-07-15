@@ -12,6 +12,7 @@ use crate::primitives::renderable::Renderable;
 use crate::primitives::cube::Cube;
 use crate::math::vec3::Vector3;
 use crate::renderer::camera::Camera;
+use crate::renderer::renderer::render;
 
 mod math;
 mod gl;
@@ -23,7 +24,7 @@ pub fn main() {
     let mut cube: Cube = Cube::new();
     scene.add_renderable(Box::new(cube));
 
-    let camera = Camera::new(65f32, 0.1, 1000f32, Vector3::new(0.,0.,15.), Vector3::new(0.,0.,1.));
+    let camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,0.,15.), Vector3::new(0.,0.,1.));
 
 
     let sdl_context = sdl2::init().unwrap();
@@ -56,6 +57,8 @@ pub fn main() {
             }
         }
 
-        display.show(&mut canvas);
+        let image = render(&scene, &camera, &width, &height);
+
+        display.show(&mut canvas, &image);
     }
 }
