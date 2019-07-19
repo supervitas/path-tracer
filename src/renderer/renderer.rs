@@ -4,17 +4,37 @@ use crate::renderer::scene::Scene;
 use crate::renderer::camera::Camera;
 use rand::Rng;
 
-pub fn render(scene: &Scene, camera: &Camera, width: &u32, height: &u32) -> Vec<u8> {
-    let mut image: Vec<u8> = Vec::with_capacity(((*width * *height) * 3) as usize);
-    let mut rng = rand::thread_rng();
+pub struct Renderer {
+    width: u32,
+    height: u32,
+    image: Vec<u8>
+}
 
-    for w in 0..*width {
-        for h in 0..*height {
-            image.push(rng.gen_range(1, 255));
-            image.push(rng.gen_range(1, 255));
-            image.push(rng.gen_range(1, 255));
+impl Renderer {
+    pub fn new(width: u32, height: u32) -> Self {
+        let image: Vec<u8> = vec![0; ((width * height) * 3) as usize];
+
+        Renderer {
+            width,
+            height,
+            image
         }
     }
 
-    return image;
+    pub fn render(&mut self, scene: &Scene, camera: &Camera) -> &Vec<u8> {
+        let mut rng = rand::thread_rng();
+
+        let mut i = 0;
+        for w in 0..self.width {
+            for h in 0..self.height {
+                self.image[i] = rng.gen_range(1, 255);
+                self.image[i + 1] = rng.gen_range(1, 255);
+                self.image[i + 2] = rng.gen_range(1, 255);
+
+                i+= 3;
+            }
+        }
+
+        return &self.image;
+    }
 }
