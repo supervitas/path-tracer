@@ -24,6 +24,8 @@ pub fn main() {
     let height = 600;
 
     let mut scene = renderer::scene::Scene::new(Vector3{x: 0.5, y: 0.1, z: 0.3});
+    let t = Vector3{x: 0.5, y: 0.1, z: 0.3};
+
     let mut cube: Cube = Cube::new();
     scene.add_renderable(Box::new(cube));
 
