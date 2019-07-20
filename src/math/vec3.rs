@@ -1,5 +1,5 @@
 use std::fmt;
-use std::ops::{Mul, Add};
+use std::ops::{Mul, Add, DivAssign};
 use num::Float;
 
 #[derive(Clone, Debug)]
@@ -9,7 +9,7 @@ pub struct Vector3 <T: Float> {
     pub z: T
 }
 
-impl <T: Float> Vector3 <T> where T: Float {
+impl <T: Float> Vector3 <T> where T: Float + DivAssign {
     pub fn new(x: T, y: T, z: T) -> Self {
         return Vector3 {x, y, z};
     }
@@ -28,6 +28,17 @@ impl <T: Float> Vector3 <T> where T: Float {
 
     pub fn magnitude(&self) -> T {
         (self.x.powi(2) + self.y.powi(2) + self.z.powi(2)).sqrt()
+    }
+
+    pub fn divide(&mut self, scalar: T) {
+        self.x /= scalar;
+        self.y /= scalar;
+        self.z /= scalar;
+    }
+
+    pub fn normalize(&mut self) {
+        let magnitude = self.magnitude();
+        self.divide(magnitude);
     }
 }
 
