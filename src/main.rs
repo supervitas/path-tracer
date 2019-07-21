@@ -8,26 +8,26 @@ use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use crate::primitives::renderable::Renderable;
-use crate::primitives::cube::Cube;
+use crate::renderables::renderable::Renderable;
+use crate::renderables::cube::Cube;
 use crate::math::vec3::Vector3;
 use crate::renderer::camera::Camera;
 use crate::renderer::renderer::Renderer;
+use crate::renderables::sphere::Sphere;
 
 mod math;
 mod gl;
-mod primitives;
+mod renderables;
 mod renderer;
 
 pub fn main() {
     let width = 800;
     let height = 600;
 
-    let mut scene = renderer::scene::Scene::new(Vector3{x: 0.5, y: 0.1, z: 0.3});
-    let t = Vector3{x: 0.5, y: 0.1, z: 0.3};
+    let mut scene = renderer::scene::Scene::new(Vector3::new( 255., 255., 255.));
 
-    let mut cube: Cube = Cube::new();
-    scene.add_renderable(Box::new(cube));
+    let mut sphere = Sphere::new(1.0, Vector3::new(0., 0., -5.));
+    scene.add_renderable(Box::new(sphere));
 
     let camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,0.,15.), Vector3::new(0.,0.,1.));
     let mut renderer = Renderer::new(width, height);
@@ -60,9 +60,7 @@ pub fn main() {
             }
         }
 
-
         let image = renderer.render(&scene, &camera);
-
         display.show(&mut canvas, &image);
     }
 }

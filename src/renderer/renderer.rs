@@ -1,8 +1,7 @@
 use crate::math::vec3::Vector3;
-use crate::primitives::renderable::Renderable;
+use crate::renderables::renderable::Renderable;
 use crate::renderer::scene::Scene;
 use crate::renderer::camera::Camera;
-use rand::Rng;
 use crate::math::ray::Ray;
 
 pub struct Renderer {
@@ -22,31 +21,42 @@ impl Renderer {
         }
     }
 
-    fn cast_ray(&self, camera: &Camera, x: usize, y: usize) -> [u8; 3] {
-        let dir_x = ((x as f64 + 0.5) / self.width as f64) * 2.0 - 1.0;
-        let dir_y = 1.0 - ((y as f64 + 0.5) / self.height as f64) * 2.0;
+    fn check_intersections(&self, camera: &Camera, scene: &Scene, x: u32, y: u32) -> Vector3<f64> {
 
-        let ray = Ray {
+        let fov_adjustment = (45.0_f64.to_radians() / 2.0).tan();
+        let aspect_ratio = (self.width as f64) / (self.height as f64);
+        let dir_x = ((((x as f64 + 0.5) / self.width as f64) * 2.0 - 1.0) * aspect_ratio) * fov_adjustment;
+        let dir_y = (1.0 - ((y as f64 + 0.5) / self.height as f64) * 2.0) * fov_adjustment;
+
+
+        let mut direction = Vector3::new(dir_x, dir_y, -1.0);
+        direction.normalize();
+
+        let mut ray = Ray {
             origin: camera.position().clone(),
-            direction: Vector3 {
-                x: dir_x,
-                y: dir_y,
-                z: -1.0,
-            }
+            direction
         };
 
-        return [21,33,44];
+        let mut result_color = scene.get_background().clone();
+
+        for renderable in scene.get_renderables() {
+            if (renderable.intersects(&ray)) {
+                result_color.set(0., 250., 0.);
+            }
+        }
+
+        return result_color
     }
 
     pub fn render(&mut self, scene: &Scene, camera: &Camera) -> &Vec<u8> {
-        let mut rng = rand::thread_rng();
-
         let mut i = 0;
         for w in 0..self.width {
             for h in 0..self.height {
-//                self.image[i] = rng.gen_range(1, 255);
-//                self.image[i + 1] = rng.gen_range(1, 255);
-//                self.image[i + 2] = rng.gen_range(1, 255);
+                let color = self.check_intersections(&camera, &scene, w, h);
+
+                self.image[i] = color.x as u8;
+                self.image[i + 1] = color.y as u8;
+                self.image[i + 2] = color.z as u8;
 
                 i+= 3;
             }

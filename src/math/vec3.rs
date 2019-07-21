@@ -1,6 +1,7 @@
 use std::fmt;
-use std::ops::{Mul, Add, DivAssign};
+use std::ops::{Mul, Add, DivAssign, Sub};
 use num::Float;
+use core::ops;
 
 #[derive(Clone, Debug)]
 pub struct Vector3 <T: Float> {
@@ -11,18 +12,16 @@ pub struct Vector3 <T: Float> {
 
 impl <T: Float> Vector3 <T> where T: Float + DivAssign {
     pub fn new(x: T, y: T, z: T) -> Self {
-        return Vector3 {x, y, z};
+        Vector3 {x, y, z}
     }
 
-    pub fn add(self, other: Vector3<T>) -> Vector3<T> {
-        Vector3 {
-            x: self.x + other.x,
-            y: self.y + other.y,
-            z: self.z + other.z
-        }
+    pub fn set(&mut self, x: T, y: T, z: T) {
+        self.x = x;
+        self.y = y;
+        self.z = z;
     }
 
-    pub fn dot(&self, v2: Vector3<T>) -> T {
+    pub fn dot(&self, v2: &Vector3<T>) -> T {
         self.x * v2.x + self.y * v2.y + self.z * v2.z
     }
 
@@ -39,6 +38,30 @@ impl <T: Float> Vector3 <T> where T: Float + DivAssign {
     pub fn normalize(&mut self) {
         let magnitude = self.magnitude();
         self.divide(magnitude);
+    }
+}
+
+impl <T: Float> ops::Add<&Vector3<T>> for &Vector3<T> {
+    type Output = Vector3<T>;
+
+    fn add(self, other: &Vector3<T>) -> Vector3<T> {
+        Vector3 {
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z
+        }
+    }
+}
+
+impl <T: Float> ops::Sub<&Vector3<T>> for &Vector3<T> {
+    type Output = Vector3<T>;
+
+    fn sub(self, other: &Vector3<T>) -> Vector3<T> {
+        Vector3 {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z
+        }
     }
 }
 

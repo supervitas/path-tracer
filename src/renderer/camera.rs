@@ -1,5 +1,5 @@
 use crate::math::vec3::Vector3;
-use crate::primitives::renderable::Renderable;
+use crate::renderables::renderable::Renderable;
 
 pub struct Camera {
     position: Vector3<f64>,
