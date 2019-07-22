@@ -40,7 +40,7 @@ impl Renderer {
         let mut result_color = scene.get_background().clone();
 
         for renderable in scene.get_renderables() {
-            if (renderable.intersects(&ray)) {
+            if renderable.intersects(&ray) {
                 result_color.set(0., 250., 0.);
             }
         }
@@ -49,16 +49,14 @@ impl Renderer {
     }
 
     pub fn render(&mut self, scene: &Scene, camera: &Camera) -> &Vec<u8> {
-        let mut i = 0;
-        for w in 0..self.width {
-            for h in 0..self.height {
+        for h in 0..self.height {
+            for w in 0..self.width {
                 let color = self.check_intersections(&camera, &scene, w, h);
+                let offset = (h * self.width * 3 + w * 3) as usize;
 
-                self.image[i] = color.x as u8;
-                self.image[i + 1] = color.y as u8;
-                self.image[i + 2] = color.z as u8;
-
-                i+= 3;
+                self.image[offset] = color.x as u8;
+                self.image[offset + 1] = color.y as u8;
+                self.image[offset + 2] = color.z as u8;
             }
         }
 

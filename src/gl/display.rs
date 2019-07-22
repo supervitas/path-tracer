@@ -37,15 +37,13 @@ impl<'a> Display <'a> {
         let height = self.height as usize;
 
         self.texture.with_lock(None, |buffer: &mut [u8], pitch: usize| {
-            let mut i = 0;
-            for w in 0..width {
-                for h in 0..height {
+            for h in 0..height {
+                for w in 0..width {
+                    let offset = h * pitch + w * 3;
 
-                    buffer[i] = image[i];
-                    buffer[i + 1] = image[i + 1];
-                    buffer[i + 2] = image[i + 2];
-
-                    i += 3;
+                    buffer[offset] = image[offset];
+                    buffer[offset + 1] = image[offset + 1];
+                    buffer[offset + 2] = image[offset + 2];
                 }
             }
         }).unwrap();
@@ -55,7 +53,7 @@ impl<'a> Display <'a> {
         self.write_image_to_texture(&image);
 
         canvas.clear();
-        canvas.copy(&self.texture, None, Some(Rect::new(0, 0, self.width, self.height)))?;
+        canvas.copy(&self.texture, None, None);
         canvas.present();
 
         Ok(())

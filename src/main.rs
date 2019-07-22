@@ -14,6 +14,7 @@ use crate::math::vec3::Vector3;
 use crate::renderer::camera::Camera;
 use crate::renderer::renderer::Renderer;
 use crate::renderables::sphere::Sphere;
+use crate::renderer::scene::Scene;
 
 mod math;
 mod gl;
