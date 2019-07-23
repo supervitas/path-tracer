@@ -2,12 +2,12 @@ use crate::math::vec3::Vector3;
 use crate::renderables::renderable::Renderable;
 
 pub struct Scene {
-    background: Vector3<f64>,
+    background: [u8; 3],
     renderables: Vec<Box<dyn Renderable>>
 }
 
 impl Scene {
-    pub fn new(background: Vector3<f64>) -> Self {
+    pub fn new(background: [u8; 3]) -> Self {
       Scene {
           background,
           renderables: Vec::new(),
@@ -18,7 +18,7 @@ impl Scene {
         &self.renderables
     }
 
-    pub fn get_background(&self) -> &Vector3<f64> {
+    pub fn get_background(&self) -> &[u8; 3] {
         &self.background
     }
 
