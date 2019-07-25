@@ -5,15 +5,15 @@ use crate::math::vec3::Vector3;
 use crate::renderables::material::Material;
 
 pub struct Cube {
-    width: f64,
-    height: f64,
-    depth: f64,
+    width: f32,
+    height: f32,
+    depth: f32,
     material: Material,
-    position: math::vec3::Vector3<f64>
+    position: math::vec3::Vector3<f32>
 }
 
 impl Cube {
-    pub fn new(width: f64, height: f64, depth: f64, position: Vector3<f64>, material: Material) -> Self {
+    pub fn new(width: f32, height: f32, depth: f32, position: Vector3<f32>, material: Material) -> Self {
         Cube {
             width,
             height,

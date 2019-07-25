@@ -23,10 +23,10 @@ impl Renderer {
 
     fn check_intersections(&self, camera: &Camera, scene: &Scene, x: u32, y: u32) -> [u8; 3] {
 
-        let fov_adjustment = (45.0_f64.to_radians() / 2.0).tan();
-        let aspect_ratio = (self.width as f64) / (self.height as f64);
-        let dir_x = ((((x as f64 + 0.5) / self.width as f64) * 2.0 - 1.0) * aspect_ratio) * fov_adjustment;
-        let dir_y = (1.0 - ((y as f64 + 0.5) / self.height as f64) * 2.0) * fov_adjustment;
+        let fov_adjustment = (45.0_f32.to_radians() / 2.0).tan();
+        let aspect_ratio = (self.width as f32) / (self.height as f32);
+        let dir_x = ((((x as f32 + 0.5) / self.width as f32) * 2.0 - 1.0) * aspect_ratio) * fov_adjustment;
+        let dir_y = (1.0 - ((y as f32 + 0.5) / self.height as f32) * 2.0) * fov_adjustment;
 
 
         let mut direction = Vector3::new(dir_x, dir_y, -1.0);

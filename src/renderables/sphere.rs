@@ -5,13 +5,13 @@ use crate::math::vec3::Vector3;
 use crate::renderables::material::Material;
 
 pub struct Sphere {
-    radius: f64,
+    radius: f32,
     material: Material,
-    position: Vector3<f64>
+    position: Vector3<f32>
 }
 
 impl Sphere {
-    pub fn new(radius: f64, position: Vector3<f64>, material: Material) -> Self {
+    pub fn new(radius: f32, position: Vector3<f32>, material: Material) -> Self {
         Sphere {
             radius,
             material,

@@ -69,8 +69,8 @@ pub fn main() {
 
 fn add_renderables(scene: &mut Scene) {
     for i in 0..5 {
-        let material = Material::new([15 * i, 10 * i, 7 * i], 1.0);
-        let mut sphere = Sphere::new(1.0, Vector3::new( -8. + i as f64 * 4. , 0., -5.), material);
+        let material = Material::new([15 * i, 10 * i + 1, 7 * i], 1.0);
+        let mut sphere = Sphere::new(1.0, Vector3::new( -8. + i as f32 * 4. , 0., -5.), material);
         scene.add_renderable(Box::new(sphere));
     }
 }
