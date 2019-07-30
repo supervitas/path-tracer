@@ -3,6 +3,8 @@ use crate::renderables::renderable::Renderable;
 use crate::renderer::scene::Scene;
 use crate::renderer::camera::Camera;
 use crate::math::ray::Ray;
+use std::f32;
+
 
 pub struct Renderer {
     width: u32,
@@ -39,9 +41,16 @@ impl Renderer {
 
         let mut result_color = scene.get_background().clone();
 
+        let mut near = f32::INFINITY;
         for renderable in scene.get_renderables() {
-            if renderable.intersects(&ray) {
-                result_color = renderable.get_material().color;
+            match renderable.intersects(&ray) {
+                Some(point) => {
+                    if point < near {
+                        near = point;
+                        result_color = renderable.get_material().color;
+                    }
+                },
+                None => {},
             }
         }
 

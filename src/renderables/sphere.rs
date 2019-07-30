@@ -21,11 +21,32 @@ impl Sphere {
 }
 
 impl Renderable for Sphere {
-    fn intersects(&self, ray: &Ray) -> bool {
-        let l = &self.position - &ray.origin;
-        let adj2 = l.dot(&ray.direction);
-        let d2 = l.dot(&l) - (adj2 * adj2);
-        d2 < (self.radius * self.radius)
+    fn intersects(&self, ray: &Ray) -> Option<f32> {
+        let from_center_to_camera = &self.position - &ray.origin;
+        let projection_length = from_center_to_camera.dot(&ray.direction);
+
+        if projection_length < 0. {
+            return None;
+        }
+
+        let from_center_to_point = from_center_to_camera.dot(&from_center_to_camera) - (projection_length * projection_length);
+
+        let quad_radius = self.radius * self.radius;
+
+        if from_center_to_point > quad_radius {
+            return None;
+        }
+
+        let from_center_to_sphere_end = f32::sqrt(quad_radius - from_center_to_point);
+
+        let first_intersection_distance = projection_length - from_center_to_sphere_end;
+        let second_intersection_distance = projection_length + from_center_to_sphere_end;
+
+        if first_intersection_distance < second_intersection_distance {
+           return Some(first_intersection_distance);
+        }
+
+        return Some(second_intersection_distance);
     }
 
     fn get_material(&self) -> &Material {

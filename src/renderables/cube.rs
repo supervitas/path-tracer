@@ -25,8 +25,8 @@ impl Cube {
 }
 
 impl Renderable for Cube {
-    fn intersects(&self, ray: &Ray) -> bool {
-        return false;
+    fn intersects(&self, ray: &Ray) -> Option<f32> {
+        None
     }
 
     fn get_material(&self) -> &Material {
