@@ -18,6 +18,7 @@ use crate::renderables::sphere::Sphere;
 use crate::renderer::scene::Scene;
 use crate::gl::display::Display;
 use crate::renderables::material::Material;
+use crate::gl::obj_loader::load_obj;
 
 mod math;
 mod gl;
@@ -68,6 +69,8 @@ pub fn main() {
 }
 
 fn add_renderables(scene: &mut Scene) {
+//    load_obj("./assets/simple.obj");
+
     for i in 0..5 {
         let material = Material::new([15 * i, 10 * i + 1, 7 * i], 1.0);
         let mut sphere = Sphere::new(1.0, Vector3::new( -8. + i as f32 * 4. , 0., -5.), material);
