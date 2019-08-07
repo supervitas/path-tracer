@@ -21,6 +21,16 @@ impl <T: Float> Vector3 <T> where T: Float + DivAssign {
         self.z = z;
     }
 
+    pub fn cross(&mut self, v2: &Vector3<T>) {
+        let ax = self.x.clone();
+        let ay = self.y.clone();
+        let az = self.z.clone();
+
+        self.x = ay * v2.z - az * v2.y;
+        self.y = az * v2.x - ax * v2.z;
+        self.z = ax * v2.y - ay * v2.x;
+    }
+
     pub fn dot(&self, v2: &Vector3<T>) -> T {
         self.x * v2.x + self.y * v2.y + self.z * v2.z
     }
