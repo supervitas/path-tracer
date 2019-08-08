@@ -9,32 +9,24 @@ use sdl2::rect::Rect;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 
-use crate::renderables::renderable::Renderable;
-use crate::renderables::cube::Cube;
-use crate::math::vec3::Vector3;
-use crate::renderer::camera::Camera;
-use crate::renderer::renderer::Renderer;
-use crate::renderables::sphere::Sphere;
-use crate::renderer::scene::Scene;
-use crate::gl::display::Display;
-use crate::renderables::material::Material;
-use crate::gl::obj_loader::load_obj;
 
-mod math;
-mod gl;
-mod renderables;
-mod renderer;
+use pathtracer::renderer::camera::Camera;
+use pathtracer::math::vec3::Vector3;
+use pathtracer::renderer::renderer::Renderer;
+use pathtracer::renderer::scene::Scene;
+use pathtracer::gl::display::Display;
+use pathtracer::renderables::material::Material;
+use pathtracer::renderables::sphere::Sphere;
 
 pub fn main() {
     let width = 800;
     let height = 600;
 
-    let mut scene = renderer::scene::Scene::new([255, 255, 255]);
+    let mut scene = Scene::new([255, 255, 255]);
     add_renderables(&mut scene);
 
     let camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,0.,15.), Vector3::new(0.,0.,1.));
     let mut renderer = Renderer::new(width, height);
-
 
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();

@@ -22,9 +22,9 @@ impl <T: Float> Vector3 <T> where T: Float + DivAssign {
     }
 
     pub fn cross(&mut self, v2: &Vector3<T>) {
-        let ax = self.x.clone();
-        let ay = self.y.clone();
-        let az = self.z.clone();
+        let ax = self.x;
+        let ay = self.y;
+        let az = self.z;
 
         self.x = ay * v2.z - az * v2.y;
         self.y = az * v2.x - ax * v2.z;
@@ -72,6 +72,12 @@ impl <T: Float> ops::Sub<&Vector3<T>> for &Vector3<T> {
             y: self.y - other.y,
             z: self.z - other.z
         }
+    }
+}
+
+impl <T: Float> PartialEq for Vector3<T> {
+    fn eq(&self, other: &Vector3<T>) -> bool {
+        self.x == other.x && self.y == other.y && self.z == other.z
     }
 }
 

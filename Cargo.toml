@@ -1,5 +1,5 @@
 [package]
-name = "PathTracer"
+name = "pathtracer"
 version = "0.1.0"
 authors = ["Nikolaev <nikolaev.vitally@yandex.ru>"]
 edition = "2018"
