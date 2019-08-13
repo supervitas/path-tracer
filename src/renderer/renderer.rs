@@ -34,7 +34,7 @@ impl Renderer {
         let mut direction = Vector3::new(dir_x, dir_y, -1.0);
         direction.normalize();
 
-        let mut ray = Ray {
+        let ray = Ray {
             origin: camera.position().clone(),
             direction
         };

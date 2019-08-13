@@ -15,13 +15,15 @@ impl <T: Float> Vector3 <T> where T: Float + DivAssign {
         Vector3 {x, y, z}
     }
 
-    pub fn set(&mut self, x: T, y: T, z: T) {
+    pub fn set(&mut self, x: T, y: T, z: T) -> &mut Self {
         self.x = x;
         self.y = y;
         self.z = z;
+
+        self
     }
 
-    pub fn cross(&mut self, v2: &Vector3<T>) {
+    pub fn cross(&mut self, v2: &Vector3<T>) -> &mut Self {
         let ax = self.x;
         let ay = self.y;
         let az = self.z;
@@ -29,6 +31,8 @@ impl <T: Float> Vector3 <T> where T: Float + DivAssign {
         self.x = ay * v2.z - az * v2.y;
         self.y = az * v2.x - ax * v2.z;
         self.z = ax * v2.y - ay * v2.x;
+
+        self
     }
 
     pub fn dot(&self, v2: &Vector3<T>) -> T {
@@ -39,15 +43,19 @@ impl <T: Float> Vector3 <T> where T: Float + DivAssign {
         (self.x.powi(2) + self.y.powi(2) + self.z.powi(2)).sqrt()
     }
 
-    pub fn divide(&mut self, scalar: T) {
+    pub fn divide(&mut self, scalar: T) -> &mut Self {
         self.x /= scalar;
         self.y /= scalar;
         self.z /= scalar;
+
+        self
     }
 
-    pub fn normalize(&mut self) {
+    pub fn normalize(&mut self) -> &mut Self {
         let magnitude = self.magnitude();
         self.divide(magnitude);
+
+        self
     }
 }
 

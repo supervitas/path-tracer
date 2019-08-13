@@ -17,6 +17,7 @@ use pathtracer::renderer::scene::Scene;
 use pathtracer::gl::display::Display;
 use pathtracer::renderables::material::Material;
 use pathtracer::renderables::sphere::Sphere;
+use pathtracer::renderables::triangle::Triangle;
 
 pub fn main() {
     let width = 800;
@@ -63,6 +64,14 @@ pub fn main() {
 fn add_renderables(scene: &mut Scene) {
 //    load_obj("./assets/simple.obj");
 
+    let material = Material::new([255, 0, 0], 1.0);
+    let triangle = Triangle::new(
+        Vector3::new(0.,0.,-5.),
+        Vector3::new(5., 0., -5.),
+        Vector3::new(5.,5., -5.),
+        None, material);
+
+    scene.add_renderable(Box::new(triangle));
     for i in 0..5 {
         let material = Material::new([15 * i, 10 * i + 1, 7 * i], 1.0);
         let mut sphere = Sphere::new(1.0, Vector3::new( -8. + i as f32 * 4. , 0., -5.), material);
