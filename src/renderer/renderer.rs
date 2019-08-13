@@ -47,7 +47,12 @@ impl Renderer {
                 Some(point) => {
                     if point < near {
                         near = point;
-                        result_color = renderable.get_material().color;
+                        match renderable.get_material() {
+                            Some(material) => {
+                                result_color = material.color;
+                            },
+                            _ => {},
+                        };
                     }
                 },
                 None => {},

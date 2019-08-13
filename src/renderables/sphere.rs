@@ -6,12 +6,12 @@ use crate::renderables::material::Material;
 
 pub struct Sphere {
     radius: f32,
-    material: Material,
+    material: Option<Material>,
     position: Vector3<f32>
 }
 
 impl Sphere {
-    pub fn new(radius: f32, position: Vector3<f32>, material: Material) -> Self {
+    pub fn new(radius: f32, position: Vector3<f32>, material: Option<Material>) -> Self {
         Sphere {
             radius,
             material,
@@ -49,7 +49,10 @@ impl Renderable for Sphere {
         return Some(second_intersection_distance);
     }
 
-    fn get_material(&self) -> &Material {
-        &self.material
+    fn get_material(&self) -> Option<&Material> {
+        match &self.material {
+            Some(material) => Some(material),
+            None => None,
+        }
     }
 }

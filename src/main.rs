@@ -18,13 +18,14 @@ use pathtracer::gl::display::Display;
 use pathtracer::renderables::material::Material;
 use pathtracer::renderables::sphere::Sphere;
 use pathtracer::renderables::triangle::Triangle;
+use pathtracer::gl::obj_loader::load_obj;
 
 pub fn main() {
     let width = 800;
     let height = 600;
 
     let mut scene = Scene::new([255, 255, 255]);
-    add_renderables(&mut scene);
+    load_model(&mut scene);
 
     let camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,0.,15.), Vector3::new(0.,0.,1.));
     let mut renderer = Renderer::new(width, height);
@@ -61,20 +62,22 @@ pub fn main() {
     }
 }
 
-fn add_renderables(scene: &mut Scene) {
-//    load_obj("./assets/simple.obj");
+fn load_model(scene: &mut Scene) {
+    load_obj("./assets/simple.obj");
+}
 
+fn test_renderables(scene: &mut Scene) {
     let material = Material::new([255, 0, 0], 1.0);
     let triangle = Triangle::new(
         Vector3::new(0.,0.,-5.),
         Vector3::new(5., 0., -5.),
         Vector3::new(5.,5., -5.),
-        None, material);
+        None, Some(material));
 
     scene.add_renderable(Box::new(triangle));
     for i in 0..5 {
         let material = Material::new([15 * i, 10 * i + 1, 7 * i], 1.0);
-        let mut sphere = Sphere::new(1.0, Vector3::new( -8. + i as f32 * 4. , 0., -5.), material);
+        let mut sphere = Sphere::new(1.0, Vector3::new( -8. + i as f32 * 4. , 0., -5.), Some(material));
         scene.add_renderable(Box::new(sphere));
     }
 }

@@ -3,7 +3,6 @@ use crate::math::ray::Ray;
 use crate::math;
 use crate::math::vec3::Vector3;
 use crate::renderables::material::Material;
-use std::ops::Deref;
 
 pub struct Triangle {
     v0: Vector3<f32>,
@@ -12,12 +11,12 @@ pub struct Triangle {
     edge1: Vector3<f32>,
     edge2: Vector3<f32>,
     normal: Vector3<f32>,
-    material: Material,
+    material: Option<Material>,
 }
 
 impl Triangle {
     pub fn new(v0: Vector3<f32>, v1: Vector3<f32>, v2: Vector3<f32>,
-               normal: Option<Vector3<f32>>, material: Material) -> Self {
+               normal: Option<Vector3<f32>>, material: Option<Material>) -> Self {
 
         let mut edge1 = &v1.clone() - &v0;
         let edge2 = &v2.clone() - &v0;
@@ -74,7 +73,10 @@ impl Renderable for Triangle {
         Some(self.edge2.dot(&qvec) * inv_det)
     }
 
-    fn get_material(&self) -> &Material {
-        &self.material
+    fn get_material(&self) -> Option<&Material> {
+        match &self.material {
+            Some(material) => Some(material),
+            None => None,
+        }
     }
 }
