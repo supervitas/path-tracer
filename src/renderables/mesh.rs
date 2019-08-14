@@ -25,13 +25,21 @@ impl Mesh {
 
 impl Renderable for Mesh {
     fn intersects(&self, ray: &Ray) -> Option<f32> {
+        let mut min_distance = std::f32::MAX;
+
         for triangle in &self.triangles {
             match triangle.intersects(ray) {
                 Some(distance) => {
-                    return Some(distance)
+                    if min_distance > distance {
+                        min_distance = distance;
+                    }
                 },
                 _ => {},
             };
+        }
+
+        if min_distance != std::f32::MAX {
+            return Some(min_distance);
         }
 
         None
