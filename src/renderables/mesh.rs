@@ -38,11 +38,12 @@ impl Renderable for Mesh {
             };
         }
 
-        if min_distance != std::f32::MAX {
-            return Some(min_distance);
+        match min_distance {
+            std::f32::MAX => {
+                return  None;
+            },
+            _ => {Some(min_distance)}
         }
-
-        None
     }
 
     fn get_material(&self) -> Option<&Material> {
