@@ -19,6 +19,7 @@ use pathtracer::renderables::material::Material;
 use pathtracer::renderables::sphere::Sphere;
 use pathtracer::renderables::triangle::Triangle;
 use pathtracer::gl::obj_loader::load_obj;
+use std::time::Duration;
 
 pub fn main() {
     let width = 800;
@@ -27,7 +28,7 @@ pub fn main() {
     let mut scene = Scene::new([255, 255, 255]);
     load_model(&mut scene);
 
-    let camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,0.,15.), Vector3::new(0.,0.,1.));
+    let camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,0.,50.), Vector3::new(0.,0.,1.));
     let mut renderer = Renderer::new(width, height);
 
     let sdl_context = sdl2::init().unwrap();
@@ -59,11 +60,17 @@ pub fn main() {
 
         let image = renderer.render(&scene, &camera);
         display.show(&mut canvas, &image);
+
+        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
 }
 
 fn load_model(scene: &mut Scene) {
-    load_obj("./assets/simple.obj");
+    let mut meshes = load_obj("./assets/simple.obj");
+
+    for mesh in meshes {
+        scene.add_renderable(Box::new(mesh));
+    }
 }
 
 fn test_renderables(scene: &mut Scene) {

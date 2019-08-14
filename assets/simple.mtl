@@ -1,32 +1,20 @@
-# Blender MTL File: 'pathtracing.blend'
-# Material Count: 3
+# Blender MTL File: 'None'
+# Material Count: 2
 
-newmtl Big_room_color
+newmtl Material
 Ns 323.999994
 Ka 1.000000 1.000000 1.000000
-Kd 0.624950 0.666359 0.800000
+Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.0 0.0 0.0
-Ni 1.000000
+Ni 1.450000
 d 1.000000
 illum 2
 
-newmtl Mini_cube
-Ns 323.999994
-Ka 1.000000 1.000000 1.000000
-Kd 0.171095 0.334607 0.800000
-Ks 0.500000 0.500000 0.500000
-Ke 0.0 0.0 0.0
-Ni 1.000000
-d 1.000000
-illum 2
-
-newmtl SphereMaterial
-Ns 323.999994
-Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.090542 0.165160
-Ks 0.500000 0.500000 0.500000
-Ke 0.0 0.0 0.0
-Ni 1.000000
-d 1.000000
+newmtl None
+Ns 500
+Ka 0.8 0.8 0.8
+Kd 0.8 0.8 0.8
+Ks 0.8 0.8 0.8
+d 1
 illum 2

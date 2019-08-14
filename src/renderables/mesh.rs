@@ -25,6 +25,15 @@ impl Mesh {
 
 impl Renderable for Mesh {
     fn intersects(&self, ray: &Ray) -> Option<f32> {
+        for triangle in &self.triangles {
+            match triangle.intersects(ray) {
+                Some(distance) => {
+                    return Some(distance)
+                },
+                _ => {},
+            };
+        }
+
         None
     }
 

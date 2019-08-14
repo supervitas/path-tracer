@@ -18,7 +18,7 @@ impl Triangle {
     pub fn new(v0: Vector3<f32>, v1: Vector3<f32>, v2: Vector3<f32>,
                normal: Option<Vector3<f32>>, material: Option<Material>) -> Self {
 
-        let mut edge1 = &v1.clone() - &v0;
+        let edge1 = &v1.clone() - &v0;
         let edge2 = &v2.clone() - &v0;
 
         let normal = normal.unwrap_or_else(|| {
