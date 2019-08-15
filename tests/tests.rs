@@ -19,7 +19,7 @@ mod tests {
     fn create_triangle() {
         let triangle = Triangle::new(Vector3::new(-1., -1., 0.),
         Vector3::new(1., -1., 0.), Vector3::new(0., 1., 0.),
-        None, Material::new([120, 50, 45], 1.));
+        None, Some(Material::new([120, 50, 45], 1.)));
 
         let normal_for_triangle = Vector3::new(0., 0., 1.);
         assert_eq!(triangle.get_normal().clone(), normal_for_triangle);
