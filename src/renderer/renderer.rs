@@ -23,7 +23,7 @@ impl Renderer {
         }
     }
 
-    fn check_intersections(&self, camera: &Camera, scene: &Scene, x: u32, y: u32) -> [u8; 3] {
+    fn check_intersections(&self, camera: &Camera, scene: &mut Scene, x: u32, y: u32) -> [u8; 3] {
 
         let fov_adjustment = (45.0_f32.to_radians() / 2.0).tan();
         let aspect_ratio = (self.width as f32) / (self.height as f32);
@@ -62,10 +62,10 @@ impl Renderer {
         return result_color
     }
 
-    pub fn render(&mut self, scene: &Scene, camera: &Camera) -> &Vec<u8> {
+    pub fn render(&mut self, scene: &mut Scene, camera: &Camera) -> &Vec<u8> {
         for h in 0..self.height {
             for w in 0..self.width {
-                let color = self.check_intersections(&camera, &scene, w, h);
+                let color = self.check_intersections(&camera, scene, w, h);
                 let offset = (h * self.width * 3 + w * 3) as usize;
 
                 self.image[offset] = color[0];

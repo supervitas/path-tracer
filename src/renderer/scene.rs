@@ -14,8 +14,8 @@ impl Scene {
       }
     }
 
-    pub fn get_renderables(&self) -> &Vec<Box<dyn Renderable>> {
-        &self.renderables
+    pub fn get_renderables(&mut self) -> &mut Vec<Box<dyn Renderable>> {
+        &mut self.renderables
     }
 
     pub fn get_background(&self) -> &[u8; 3] {

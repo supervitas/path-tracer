@@ -3,7 +3,7 @@ use std::ops::{Mul, Add, DivAssign, Sub};
 use num::Float;
 use core::ops;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct Vector3 <T: Float> {
     pub x: T,
     pub y: T,
@@ -21,6 +21,12 @@ impl <T: Float> Vector3 <T> where T: Float + DivAssign {
         self.z = z;
 
         self
+    }
+
+    pub fn copy(&mut self, v2: &Vector3<T>) {
+        self.x = v2.x;
+        self.y = v2.y;
+        self.z = v2.z;
     }
 
     pub fn cross(&mut self, v2: &Vector3<T>) -> &mut Self {

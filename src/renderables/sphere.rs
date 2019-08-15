@@ -21,7 +21,7 @@ impl Sphere {
 }
 
 impl Renderable for Sphere {
-    fn intersects(&self, ray: &Ray) -> Option<f32> {
+    fn intersects(&mut self, ray: &Ray) -> Option<f32> {
         let from_center_to_camera = &self.position - &ray.origin;
         let projection_length = from_center_to_camera.dot(&ray.direction);
 

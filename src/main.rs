@@ -58,7 +58,7 @@ pub fn main() {
             }
         }
 
-        let image = renderer.render(&scene, &camera);
+        let image = renderer.render(&mut scene, &camera);
         display.show(&mut canvas, &image);
 
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
