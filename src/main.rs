@@ -28,7 +28,7 @@ pub fn main() {
     let height = 600;
 
     let mut lights =  Vec::new();
-    let light = Light::new(Color::new(255, 255, 255), 100., Vector3::new(10., 10., -10.));
+    let light = Light::new(Color::new(255, 255, 255), 10., Vector3::new(0., 1., 0.));
     lights.push(light);
 
     let mut scene = Scene::new(Color::new(0, 204, 255), lights);

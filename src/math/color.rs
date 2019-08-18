@@ -1,4 +1,4 @@
-use std::ops;
+use std::{ops, fmt};
 use std::ops::AddAssign;
 
 #[derive(Clone, Copy, Debug)]
@@ -10,7 +10,7 @@ pub struct Color {
 
 impl Color {
     pub fn new(r: u8, g: u8, b: u8) -> Self {
-        Color {r: (r / 255) as f32, g: (g / 255) as f32, b: (b / 255) as f32}
+        Color {r: r as f32 / 255., g: g as f32 / 255., b: b as f32 / 255.}
     }
 }
 
@@ -49,3 +49,8 @@ impl AddAssign for Color {
     }
 }
 
+impl fmt::Display for Color {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "r: {}, g: {}, b: {}", self.r, self.g, self.b)
+    }
+}

@@ -26,15 +26,15 @@ impl Renderer {
 
     fn calculate_light(&self, ray: &Ray, hit_distance: f32, renderable: &Box<dyn Renderable>, lights: &Vec<Light>) -> Color {
         let mut color = Color::new(0,0,0);
-
         let mut albedo = Color::new(0,0,0);
 
         match renderable.get_material() {
             Some(material) => {
-                albedo = material.albedo;
+                albedo = material.get_albedo().clone();
             },
             _ => {},
         };
+
 
         let hit_point = &ray.origin + &(ray.direction * hit_distance);
         let renderable_normal = renderable.get_normal(&hit_point);
@@ -43,7 +43,7 @@ impl Renderer {
             let direction_to_light = -light.direction;
             let light_power = f32::max(renderable_normal.dot(&direction_to_light), 0.0) * light.intensity;
 
-            let light_reflected = albedo / std::f32::consts::PI;
+            let light_reflected = albedo.clone() / std::f32::consts::PI;
 
             color += albedo * light.color * light_power * light_reflected;
 
