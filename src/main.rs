@@ -20,15 +20,21 @@ use pathtracer::renderables::sphere::Sphere;
 use pathtracer::renderables::triangle::Triangle;
 use pathtracer::gl::obj_loader::load_obj;
 use std::time::{Duration, Instant};
+use pathtracer::renderer::light::Light;
+use pathtracer::renderables::plane::Plane;
 
 pub fn main() {
     let width = 800;
     let height = 600;
 
-    let mut scene = Scene::new([255, 255, 255]);
+    let mut lights =  Vec::new();
+    let light = Light::new([255, 255, 255], 10., Vector3::new(10., 10., -10.));
+    lights.push(light);
+
+    let mut scene = Scene::new([0, 204, 255], lights);
     load_model(&mut scene);
 
-    let camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,0.,50.), Vector3::new(0.,0.,1.));
+    let camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,5.,20.), Vector3::new(0.,0.,1.));
     let mut renderer = Renderer::new(width, height);
 
     let sdl_context = sdl2::init().unwrap();
@@ -74,6 +80,15 @@ fn load_model(scene: &mut Scene) {
     for mesh in meshes {
         scene.add_renderable(Box::new(mesh));
     }
+
+    let material = Material::new([200,  250, 150], 1.0);
+    let mut sphere = Sphere::new(1.5, Vector3::new( -5. , 10., -5.), Some(material));
+
+    let mut plane = Plane::new(Vector3::new(0.,0., -5.),
+                               Some(Material::new([10,  50, 150], 1.0)), Vector3::new(0., 1.,0.));
+
+    scene.add_renderable(Box::new(sphere));
+    scene.add_renderable(Box::new(plane));
 }
 
 fn test_renderables(scene: &mut Scene) {
