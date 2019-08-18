@@ -19,7 +19,7 @@ use pathtracer::renderables::material::Material;
 use pathtracer::renderables::sphere::Sphere;
 use pathtracer::renderables::triangle::Triangle;
 use pathtracer::gl::obj_loader::load_obj;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 pub fn main() {
     let width = 800;
@@ -50,6 +50,7 @@ pub fn main() {
     let mut event_pump = sdl_context.event_pump().map_err(|e| e.to_string()).unwrap();
 
     'running: loop {
+        let now = Instant::now();
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit { .. } |
@@ -60,6 +61,8 @@ pub fn main() {
 
         let image = renderer.render(&mut scene, &camera);
         display.show(&mut canvas, &image);
+
+        println!("Render time: {}", now.elapsed().as_millis());
 
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
