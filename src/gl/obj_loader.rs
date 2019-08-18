@@ -34,22 +34,23 @@ pub fn load_obj(path: &str) -> Vec<Mesh> {
             let index3 = mesh.indices[3 * f + 2] as usize;
 
             let v0 = Vector3::new(
-                mesh.positions[3 * index1].clone(),
-                mesh.positions[3 * index1 + 1].clone(),
-                mesh.positions[3 * index1 + 2].clone()
+                mesh.positions[3 * index1],
+                mesh.positions[3 * index1 + 1],
+                mesh.positions[3 * index1 + 2]
             );
 
             let v1 = Vector3::new(
-                mesh.positions[3 * index2].clone(),
-                mesh.positions[3 * index2 + 1].clone(),
-                mesh.positions[3 * index2 + 2].clone()
+                mesh.positions[3 * index2],
+                mesh.positions[3 * index2 + 1],
+                mesh.positions[3 * index2 + 2]
             );
 
             let v2 = Vector3::new(
-                mesh.positions[3 * index3].clone(),
-                mesh.positions[3 * index3 + 1].clone(),
-                mesh.positions[3 * index3 + 2].clone()
+                mesh.positions[3 * index3],
+                mesh.positions[3 * index3 + 1],
+                mesh.positions[3 * index3 + 2]
             );
+
 
             let triangle = Triangle::new(v0, v1, v2, None, None);
             triangles.push(triangle);
@@ -57,5 +58,6 @@ pub fn load_obj(path: &str) -> Vec<Mesh> {
 
         meshes.push(Mesh::new(Some(material), triangles, m.name.clone()));
     }
+
     meshes
 }

@@ -1,6 +1,6 @@
 use std::fmt;
-use std::ops::{Mul, Add, DivAssign, Sub};
-use num::Float;
+use std::ops::{Mul, Add, DivAssign, Sub, Div};
+use num::{Float, ToPrimitive};
 use core::ops;
 
 #[derive(Clone, Copy, Debug)]

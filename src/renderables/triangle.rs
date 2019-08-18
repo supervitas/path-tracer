@@ -12,10 +12,6 @@ pub struct Triangle {
     edge2: Vector3<f32>,
     normal: Vector3<f32>,
     material: Option<Material>,
-
-    pvec: Vector3<f32>,
-    tvec: Vector3<f32>,
-    qvec: Vector3<f32>
 }
 
 impl Triangle {
@@ -38,46 +34,46 @@ impl Triangle {
             edge1,
             edge2,
             normal,
-            material,
-            pvec: Vector3::new(0.,0.,0.),
-            tvec: Vector3::new(0.,0.,0.),
-            qvec: Vector3::new(0.,0.,0.)
+            material
         }
     }
 
     pub fn get_normal(&self) -> &Vector3<f32> {
         &self.normal
     }
+
+    pub fn get_vertices(&self) -> [&Vector3<f32>; 3] {
+        [&self.v0, &self.v1, &self.v2]
+    }
 }
 
 impl Renderable for Triangle {
-    fn intersects(&mut self, ray: &Ray) -> Option<f32> {
-        self.pvec.copy(&ray.direction);
-        self.pvec.cross(&self.edge2);
+    fn intersects(&self, ray: &Ray) -> Option<f32> {
+        let mut pvec = ray.direction.clone();
+        pvec.cross(&self.edge2);
 
-        let det = self.edge1.dot(&self.pvec);
-        if det < 1e-8 && det > -1e-8 {
+        let det = self.edge1.dot(&pvec);
+        if det < std::f32::EPSILON && det > -std::f32::EPSILON {
             return None;
         }
 
         let inv_det = 1.0 / det;
-        self.tvec = ray.origin;
-        self.tvec = &self.tvec - &self.v0;
+        let tvec = &ray.origin - &self.v0;
 
-        let u = self.tvec.dot(&self.pvec) * inv_det;
+        let u = tvec.dot(&pvec) * inv_det;
         if u < 0. || u > 1. {
             return None;
         }
 
-        self.qvec = self.tvec;
-        self.qvec.cross(&self.edge1);
+        let mut qvec = tvec.clone();
+        qvec.cross(&self.edge1);
 
-        let v = ray.direction.dot(&self.qvec) * inv_det;
+        let v = ray.direction.dot(&qvec) * inv_det;
         if v < 0. || u + v > 1. {
             return None;
         }
 
-        Some(self.edge2.dot(&self.qvec) * inv_det)
+        Some(self.edge2.dot(&qvec) * inv_det)
     }
 
     fn get_material(&self) -> Option<&Material> {

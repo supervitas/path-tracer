@@ -1,5 +1,4 @@
 extern crate rand;
-use rand::Rng;
 
 extern crate sdl2;
 use sdl2::pixels::PixelFormatEnum;
