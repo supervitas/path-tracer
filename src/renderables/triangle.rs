@@ -38,7 +38,7 @@ impl Triangle {
         }
     }
 
-    pub fn get_normal(&self) -> &Vector3<f32> {
+    pub fn get_triangle_normal(&self) -> &Vector3<f32> {
         &self.normal
     }
 
@@ -81,5 +81,9 @@ impl Renderable for Triangle {
             Some(material) => Some(material),
             None => None,
         }
+    }
+
+    fn get_normal(&self, hit: &Vector3<f32>) -> Vector3<f32> {
+        self.normal.clone()
     }
 }

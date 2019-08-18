@@ -1,15 +1,16 @@
 use crate::math::vec3::Vector3;
 use crate::renderables::renderable::Renderable;
 use crate::renderer::light::Light;
+use crate::math::color::Color;
 
 pub struct Scene {
-    background: [u8; 3],
+    background: Color,
     lights: Vec<Light>,
     renderables: Vec<Box<dyn Renderable>>
 }
 
 impl Scene {
-    pub fn new(background: [u8; 3], lights: Vec<Light>) -> Self {
+    pub fn new(background: Color, lights: Vec<Light>) -> Self {
       Scene {
           background,
           lights,
@@ -17,15 +18,15 @@ impl Scene {
       }
     }
 
-    pub fn get_renderables(&mut self) -> &mut Vec<Box<dyn Renderable>> {
-        &mut self.renderables
+    pub fn get_renderables(&self) -> &Vec<Box<dyn Renderable>> {
+        &self.renderables
     }
 
     pub fn get_lights(&self) -> &Vec<Light>{
         &self.lights
     }
 
-    pub fn get_background(&self) -> &[u8; 3] {
+    pub fn get_background(&self) -> &Color {
         &self.background
     }
 

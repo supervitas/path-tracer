@@ -55,4 +55,11 @@ impl Renderable for Sphere {
             None => None,
         }
     }
+
+    fn get_normal(&self, hit: &Vector3<f32>) -> Vector3<f32> {
+        let mut t = hit - &self.position;
+
+        t.normalize();
+        t
+    }
 }

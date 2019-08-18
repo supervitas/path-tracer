@@ -1,5 +1,5 @@
 use std::fmt;
-use std::ops::{Mul, Add, DivAssign, Sub, Div};
+use std::ops::{Mul, Add, DivAssign, Sub, Div, Neg};
 use num::{Float, ToPrimitive};
 use core::ops;
 
@@ -77,6 +77,18 @@ impl <T: Float> ops::Add<&Vector3<T>> for &Vector3<T> {
     }
 }
 
+impl ops::Mul<f32> for Vector3<f32> {
+    type Output = Vector3<f32>;
+
+    fn mul(self, other: f32) -> Vector3<f32> {
+        Vector3 {
+            x: self.x * other,
+            y: self.y * other,
+            z: self.z * other,
+        }
+    }
+}
+
 impl <T: Float> ops::Sub<&Vector3<T>> for &Vector3<T> {
     type Output = Vector3<T>;
 
@@ -92,6 +104,18 @@ impl <T: Float> ops::Sub<&Vector3<T>> for &Vector3<T> {
 impl <T: Float> PartialEq for Vector3<T> {
     fn eq(&self, other: &Vector3<T>) -> bool {
         self.x == other.x && self.y == other.y && self.z == other.z
+    }
+}
+
+impl <T: Float> Neg for Vector3<T> {
+    type Output = Vector3<T>;
+
+    fn neg(self) -> Vector3<T> {
+        Vector3 {
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
+        }
     }
 }
 

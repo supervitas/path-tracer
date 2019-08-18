@@ -1,10 +1,12 @@
+use crate::math::color::Color;
+
 pub struct Material {
-    pub color: [u8; 3],
+    pub albedo: Color,
     pub opacity: f32,
 }
 
 impl Material {
-    pub fn new(color: [u8; 3], opacity: f32) -> Self {
-        Material {color, opacity}
+    pub fn new(albedo: Color, opacity: f32) -> Self {
+        Material {albedo, opacity}
     }
 }

@@ -5,6 +5,7 @@ use std::collections::HashMap;
 use crate::renderables::material::Material;
 use crate::math::vec3::Vector3;
 use crate::renderables::triangle::Triangle;
+use crate::math::color::Color;
 
 
 pub fn load_obj(path: &str) -> Vec<Mesh> {
@@ -18,11 +19,11 @@ pub fn load_obj(path: &str) -> Vec<Mesh> {
         let mesh = &m.mesh;
 
         let mat = &materials[mesh.material_id.unwrap()];
-        let diffuse_color = [
+        let diffuse_color = Color::new(
             (mat.diffuse[0] * 255.) as u8,
             (mat.diffuse[1] * 255.) as u8,
             (mat.diffuse[2] * 255.) as u8
-        ];
+        );
 
         let material = Material::new(diffuse_color, 1.0);
 

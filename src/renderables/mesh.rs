@@ -63,4 +63,8 @@ impl Renderable for Mesh {
             None => None,
         }
     }
+
+    fn get_normal(&self, hit: &Vector3<f32>) -> Vector3<f32> {
+        Vector3::new(0.,0.,0.) // todo
+    }
 }
