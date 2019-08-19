@@ -20,9 +20,9 @@ pub fn load_obj(path: &str) -> Vec<Mesh> {
 
         let mat = &materials[mesh.material_id.unwrap()];
         let diffuse_color = Color::new(
-            (mat.diffuse[0] * 255.) as u8,
-            (mat.diffuse[1] * 255.) as u8,
-            (mat.diffuse[2] * 255.) as u8
+            mat.diffuse[0],
+            mat.diffuse[1],
+            mat.diffuse[2]
         );
 
         let material = Material::new(diffuse_color, 1.0);

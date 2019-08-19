@@ -101,12 +101,6 @@ impl <T: Float> ops::Sub<&Vector3<T>> for &Vector3<T> {
     }
 }
 
-impl <T: Float> PartialEq for Vector3<T> {
-    fn eq(&self, other: &Vector3<T>) -> bool {
-        self.x == other.x && self.y == other.y && self.z == other.z
-    }
-}
-
 impl <T: Float> Neg for Vector3<T> {
     type Output = Vector3<T>;
 
@@ -116,6 +110,12 @@ impl <T: Float> Neg for Vector3<T> {
             y: -self.y,
             z: -self.z,
         }
+    }
+}
+
+impl <T: Float> PartialEq for Vector3<T> {
+    fn eq(&self, other: &Vector3<T>) -> bool {
+        self.x == other.x && self.y == other.y && self.z == other.z
     }
 }
 

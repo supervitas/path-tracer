@@ -4,6 +4,8 @@ mod tests {
     use pathtracer::math::vec3::Vector3;
     use pathtracer::renderables::triangle::Triangle;
     use pathtracer::renderables::material::Material;
+    use pathtracer::math::color::Color;
+    use std::ops::Mul;
 
     #[test]
     fn cross_product() {
@@ -19,9 +21,18 @@ mod tests {
     fn create_triangle() {
         let triangle = Triangle::new(Vector3::new(-1., -1., 0.),
         Vector3::new(1., -1., 0.), Vector3::new(0., 1., 0.),
-        None, Some(Material::new([120, 50, 45], 1.)));
+        None, Some(Material::new(Color::new(0.,0.,0.), 1.)));
 
         let normal_for_triangle = Vector3::new(0., 0., 1.);
         assert_eq!(triangle.get_triangle_normal().clone(), normal_for_triangle);
+    }
+
+    #[test]
+    fn test_color_mul() {
+        let mut color = Color::new(0.5, 1., 0.3);
+        color = color * 2.;
+
+        let etalon = Color::new(1., 2., 0.6);
+        assert_eq!(color, etalon);
     }
 }

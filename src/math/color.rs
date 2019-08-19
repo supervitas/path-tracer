@@ -9,8 +9,8 @@ pub struct Color {
 }
 
 impl Color {
-    pub fn new(r: u8, g: u8, b: u8) -> Self {
-        Color {r: r as f32 / 255., g: g as f32 / 255., b: b as f32 / 255.}
+    pub fn new(r: f32, g: f32, b: f32) -> Self {
+        Color {r, g, b}
     }
 }
 
@@ -48,6 +48,13 @@ impl AddAssign for Color {
         };
     }
 }
+
+impl PartialEq for Color {
+    fn eq(&self, other: &Color) -> bool {
+        self.r == other.r && self.g == other.g && self.b == other.b
+    }
+}
+
 
 impl fmt::Display for Color {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

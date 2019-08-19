@@ -25,8 +25,8 @@ impl Renderer {
     }
 
     fn calculate_light(&self, ray: &Ray, hit_distance: f32, renderable: &Box<dyn Renderable>, lights: &Vec<Light>) -> Color {
-        let mut color = Color::new(0,0,0);
-        let mut albedo = Color::new(0,0,0);
+        let mut color = Color::new(0.,0.,0.);
+        let mut albedo = Color::new(0.,0.,0.);
 
         match renderable.get_material() {
             Some(material) => {
@@ -40,13 +40,9 @@ impl Renderer {
         let renderable_normal = renderable.get_normal(&hit_point);
 
         for light in lights {
-            let direction_to_light = -light.direction;
-            let light_power = f32::max(renderable_normal.dot(&direction_to_light), 0.0) * light.intensity;
+            let diffuse =  light.intensity * f32::max(0., light.direction.dot(&renderable_normal));
 
-            let light_reflected = albedo.clone() / std::f32::consts::PI;
-
-            color += albedo * light.color * light_power * light_reflected;
-
+            color += albedo * diffuse;
         }
 
         color
@@ -93,9 +89,9 @@ impl Renderer {
                 let color = self.check_intersections(&camera, scene, w, h);
                 let offset = (h * self.width * 3 + w * 3) as usize;
 
-                self.image[offset] = (color.r * 255.) as u8;
-                self.image[offset + 1] = (color.g * 255.) as u8;
-                self.image[offset + 2] = (color.b * 255.) as u8;
+                self.image[offset] = color.r as u8;
+                self.image[offset + 1] = color.g as u8;
+                self.image[offset + 2] = color.b as u8;
             }
         }
 
