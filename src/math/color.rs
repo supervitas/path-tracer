@@ -12,6 +12,20 @@ impl Color {
     pub fn new(r: f32, g: f32, b: f32) -> Self {
         Color {r, g, b}
     }
+
+    pub fn as_u8(self) -> [u8; 3] {
+        [
+            f32::min(self.r,255.0) as u8,
+            f32::min(self.g,255.0) as u8,
+            f32::min(self.b,255.0) as u8
+        ]
+    }
+
+    pub fn set(&mut self, r: f32, g: f32, b: f32) {
+        self.r = r;
+        self.g = g;
+        self.b = b;
+    }
 }
 
 

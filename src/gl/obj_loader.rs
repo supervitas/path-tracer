@@ -25,7 +25,7 @@ pub fn load_obj(path: &str) -> Vec<Mesh> {
             mat.diffuse[2]
         );
 
-        let material = Material::new(diffuse_color, 1.0);
+        let material = Material::new(diffuse_color);
 
         let mut triangles: Vec<Triangle> = Vec::new();
 

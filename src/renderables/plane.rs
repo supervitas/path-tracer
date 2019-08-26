@@ -44,6 +44,6 @@ impl Renderable for Plane {
     }
 
     fn get_normal(&self, _: &Vector3<f32>) -> Vector3<f32> {
-        -self.normal
+        self.normal
     }
 }

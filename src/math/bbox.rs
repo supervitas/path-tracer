@@ -45,7 +45,7 @@ impl BBox {
         tmax = f32::min(tymax, tmax);
 
         let mut tzmin = (self.min.z - ray.origin.z) * dir_inv.z;
-        let mut tzmax = (self.max.z- ray.origin.z) * dir_inv.z;
+        let mut tzmax = (self.max.z - ray.origin.z) * dir_inv.z;
 
         if tzmin > tzmax {
             mem::swap(&mut tzmin, &mut tzmax);

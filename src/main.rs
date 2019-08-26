@@ -27,12 +27,11 @@ pub fn main() {
     let width = 800;
     let height = 600;
 
-    let mut lights =  Vec::new();
-    let light = Light::new(Color::new(1., 1., 1.), 10., Vector3::new(10., 10., -10.));
-    lights.push(light);
-
-    let mut scene = Scene::new(Color::new(0., 0.8, 1.), lights);
-    load_model(&mut scene);
+    let mut scene = Scene::new(Color::new(0., 233., 255.));
+    let light = Light::new(Color::new(255., 255., 255.), 10.2, Vector3::new(2., 20., -10.));
+    scene.add_light(light);
+//    scene.load_model(String::from("./assets/simple.obj"));
+    add_test_renderables(&mut scene);
 
     let camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,5.,20.), Vector3::new(0.,0.,1.));
     let mut renderer = Renderer::new(width, height);
@@ -74,18 +73,18 @@ pub fn main() {
     }
 }
 
-fn load_model(scene: &mut Scene) {
-    let mut meshes = load_obj("./assets/simple.obj");
+fn add_test_renderables(scene: &mut Scene) {
+    let material = Material::new(Color::new(80.,  10., 15.));
+    let mut sphere = Sphere::new(1.5, Vector3::new( -5. , 10., -5.),
+                                 Some(material));
 
-    for mesh in meshes {
-        scene.add_renderable(Box::new(mesh));
-    }
-
-    let material = Material::new(Color::new(0.2,  0.9, 0.8), 1.0);
-    let mut sphere = Sphere::new(1.5, Vector3::new( -5. , 10., -5.), Some(material));
+    let mut plane_material = Material::new(Color::new(0.,  255., 255.0));
+    plane_material.metalness = 1.;
+    plane_material.roughness = 0.;
 
     let mut plane = Plane::new(Vector3::new(0.,0., -5.),
-                               Some(Material::new(Color::new(0.2,  0.3, 0.9), 1.0)), Vector3::new(0., 1.,0.));
+                               Some(plane_material),
+                               Vector3::new(0., 1.,0.));
 
     scene.add_renderable(Box::new(sphere));
     scene.add_renderable(Box::new(plane));
