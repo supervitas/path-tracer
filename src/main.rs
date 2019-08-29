@@ -30,7 +30,8 @@ pub fn main() {
     let mut scene = Scene::new(Color::new(0., 233., 255.));
     let light = Light::new(Color::new(255., 255., 255.), 10.2, Vector3::new(2., 20., -10.));
     scene.add_light(light);
-//    scene.load_model(String::from("./assets/simple.obj"));
+
+    scene.load_model(String::from("./assets/simple.obj"));
     add_test_renderables(&mut scene);
 
     let camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,5.,20.), Vector3::new(0.,0.,1.));

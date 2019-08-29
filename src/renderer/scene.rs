@@ -41,7 +41,7 @@ impl Scene {
     }
 
     pub fn load_model(&mut self, path: String) {
-        let mut meshes = load_obj(&path);
+        let meshes = load_obj(&path);
 
         for mesh in meshes {
             self.add_renderable(Box::new(mesh));

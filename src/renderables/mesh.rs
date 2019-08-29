@@ -24,7 +24,6 @@ impl Mesh {
             bbox
         }
     }
-
 }
 
 impl Renderable for Mesh {
