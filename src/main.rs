@@ -23,6 +23,10 @@ use pathtracer::renderer::light::Light;
 use pathtracer::renderables::plane::Plane;
 use pathtracer::math::color::Color;
 
+
+use sdl2::mouse::MouseButton;
+use pathtracer::renderer::camera_controller::CameraController;
+
 pub fn main() {
     let width = 800;
     let height = 600;
@@ -35,6 +39,8 @@ pub fn main() {
     add_test_renderables(&mut scene);
 
     let camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,5.,20.), Vector3::new(0.,0.,1.));
+    let camera_controller = CameraController::new(&camera);
+
     let mut renderer = Renderer::new(width, height);
 
     let sdl_context = sdl2::init().unwrap();
@@ -64,6 +70,8 @@ pub fn main() {
                 _ => {}
             }
         }
+
+        camera_controller.update(&event_pump);
 
         let image = renderer.render(&mut scene, &camera);
         display.show(&mut canvas, &image);
