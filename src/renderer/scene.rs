@@ -1,11 +1,7 @@
-use crate::math::vec3::Vector3;
 use crate::renderables::renderable::Renderable;
 use crate::renderer::light::Light;
 use crate::math::color::Color;
 use crate::gl::obj_loader::load_obj;
-use crate::renderables::material::Material;
-use crate::renderables::sphere::Sphere;
-use crate::renderables::plane::Plane;
 
 pub struct Scene {
     background: Color,

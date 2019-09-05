@@ -1,6 +1,5 @@
 use crate::renderables::renderable::Renderable;
 use crate::math::ray::Ray;
-use crate::math;
 use crate::math::vec3::Vector3;
 use crate::renderables::material::Material;
 

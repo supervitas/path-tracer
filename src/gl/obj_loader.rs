@@ -1,7 +1,6 @@
 use std::path::Path;
 use tobj;
 use crate::renderables::mesh::Mesh;
-use std::collections::HashMap;
 use crate::renderables::material::Material;
 use crate::math::vec3::Vector3;
 use crate::renderables::triangle::Triangle;

@@ -13,6 +13,7 @@ use pathtracer::renderer::camera::Camera;
 use pathtracer::math::vec3::Vector3;
 use pathtracer::renderer::renderer::Renderer;
 use pathtracer::renderer::scene::Scene;
+use pathtracer::renderer::camera_controller;
 use pathtracer::gl::display::Display;
 use pathtracer::renderables::material::Material;
 use pathtracer::renderables::sphere::Sphere;
@@ -23,9 +24,6 @@ use pathtracer::renderer::light::Light;
 use pathtracer::renderables::plane::Plane;
 use pathtracer::math::color::Color;
 
-
-use sdl2::mouse::MouseButton;
-use pathtracer::renderer::camera_controller::CameraController;
 
 pub fn main() {
     let width = 800;
@@ -38,8 +36,7 @@ pub fn main() {
     scene.load_model(String::from("./assets/simple.obj"));
     add_test_renderables(&mut scene);
 
-    let camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,5.,20.), Vector3::new(0.,0.,1.));
-    let camera_controller = CameraController::new(&camera);
+    let mut camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,5.,20.), Vector3::new(0.,0.,1.));
 
     let mut renderer = Renderer::new(width, height);
 
@@ -71,9 +68,9 @@ pub fn main() {
             }
         }
 
-        camera_controller.update(&event_pump);
+        camera_controller::update(&mut camera, &event_pump);
 
-        let image = renderer.render(&mut scene, &camera);
+        let image = renderer.render(&mut scene, &mut camera);
         display.show(&mut canvas, &image);
 
         println!("Render time: {}", now.elapsed().as_millis());
@@ -84,14 +81,14 @@ pub fn main() {
 
 fn add_test_renderables(scene: &mut Scene) {
     let material = Material::new(Color::new(80.,  10., 15.));
-    let mut sphere = Sphere::new(1.5, Vector3::new( -5. , 10., -5.),
+    let sphere = Sphere::new(1.5, Vector3::new( -5. , 10., -5.),
                                  Some(material));
 
     let mut plane_material = Material::new(Color::new(0.,  255., 255.0));
     plane_material.metalness = 1.;
     plane_material.roughness = 0.;
 
-    let mut plane = Plane::new(Vector3::new(0.,0., -5.),
+    let plane = Plane::new(Vector3::new(0.,0., -5.),
                                Some(plane_material),
                                Vector3::new(0., 1.,0.));
 

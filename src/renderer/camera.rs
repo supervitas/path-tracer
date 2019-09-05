@@ -1,5 +1,4 @@
 use crate::math::vec3::Vector3;
-use crate::renderables::renderable::Renderable;
 
 pub struct Camera {
     position: Vector3<f32>,
@@ -18,6 +17,10 @@ impl Camera {
             position,
             direction
         }
+    }
+
+    pub fn set_position(&mut self, position: Vector3<f32>) {
+        self.position = position;
     }
 
     pub fn position(&self) -> &Vector3<f32> {
