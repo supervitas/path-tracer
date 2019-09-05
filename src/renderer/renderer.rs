@@ -73,7 +73,7 @@ impl Renderer {
         }
     }
 
-    fn check_intersections(&self, ray: Ray, scene: &mut Scene) -> Color {
+    fn check_intersections(&self, ray: Ray, scene: &Scene) -> Color {
         let mut pixel_color = scene.get_background().clone();
         let lights = scene.get_lights();
 
@@ -103,7 +103,7 @@ impl Renderer {
         pixel_color
     }
 
-    pub fn render(&mut self, scene: &mut Scene, camera: &mut Camera) -> &Vec<u8> {
+    pub fn render(&mut self, scene: &Scene, camera: &Camera) -> &Vec<u8> {
         for h in 0..self.height {
             for w in 0..self.width {
                 let offset = (h * self.width * 3 + w * 3) as usize;

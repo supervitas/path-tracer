@@ -13,7 +13,6 @@ use pathtracer::renderer::camera::Camera;
 use pathtracer::math::vec3::Vector3;
 use pathtracer::renderer::renderer::Renderer;
 use pathtracer::renderer::scene::Scene;
-use pathtracer::renderer::camera_controller;
 use pathtracer::gl::display::Display;
 use pathtracer::renderables::material::Material;
 use pathtracer::renderables::sphere::Sphere;
@@ -24,6 +23,7 @@ use pathtracer::renderer::light::Light;
 use pathtracer::renderables::plane::Plane;
 use pathtracer::math::color::Color;
 
+use pathtracer::renderer::camera_controller::CameraController;
 
 pub fn main() {
     let width = 800;
@@ -37,6 +37,7 @@ pub fn main() {
     add_test_renderables(&mut scene);
 
     let mut camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,5.,20.), Vector3::new(0.,0.,1.));
+    let mut camera_controller = CameraController::new();
 
     let mut renderer = Renderer::new(width, height);
 
@@ -68,9 +69,10 @@ pub fn main() {
             }
         }
 
-        camera_controller::update(&mut camera, &event_pump);
+        camera_controller.update(&mut camera, &event_pump);
+        let image = renderer.render(&scene, &camera);
 
-        let image = renderer.render(&mut scene, &mut camera);
+
         display.show(&mut canvas, &image);
 
         println!("Render time: {}", now.elapsed().as_millis());
