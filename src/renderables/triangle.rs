@@ -10,21 +10,12 @@ pub struct Triangle {
     edge1: Vector3<f32>,
     edge2: Vector3<f32>,
     normal: Vector3<f32>,
-    material: Option<Material>,
 }
 
 impl Triangle {
-    pub fn new(v0: Vector3<f32>, v1: Vector3<f32>, v2: Vector3<f32>,
-               normal: Option<Vector3<f32>>, material: Option<Material>) -> Self {
-
+    pub fn new(v0: Vector3<f32>, v1: Vector3<f32>, v2: Vector3<f32>, normal: Vector3<f32>) -> Self {
         let edge1 = &v1.clone() - &v0;
         let edge2 = &v2.clone() - &v0;
-
-        let normal = normal.unwrap_or_else(|| {
-            let mut edge1 = edge1.clone();
-            edge1.cross(&edge2).normalize();
-            edge1
-        });
 
         Triangle {
             v0,
@@ -33,7 +24,6 @@ impl Triangle {
             edge1,
             edge2,
             normal,
-            material
         }
     }
 
@@ -44,10 +34,12 @@ impl Triangle {
     pub fn get_vertices(&self) -> [&Vector3<f32>; 3] {
         [&self.v0, &self.v1, &self.v2]
     }
-}
 
-impl Renderable for Triangle {
-    fn intersects(&self, ray: &Ray) -> Option<f32> {
+    pub fn get_normal(&self) -> Vector3<f32> {
+        self.normal
+    }
+
+    pub fn intersects(&self, ray: &Ray) -> Option<f32> {
         let mut pvec = ray.direction.clone();
         pvec.cross(&self.edge2);
 
@@ -73,16 +65,5 @@ impl Renderable for Triangle {
         }
 
         Some(self.edge2.dot(&qvec) * inv_det)
-    }
-
-    fn get_material(&self) -> Option<&Material> {
-        match &self.material {
-            Some(material) => Some(material),
-            None => None,
-        }
-    }
-
-    fn get_normal(&self, hit: &Vector3<f32>) -> Vector3<f32> {
-        self.normal.clone()
     }
 }

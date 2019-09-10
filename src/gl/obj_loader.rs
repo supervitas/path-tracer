@@ -51,12 +51,18 @@ pub fn load_obj(path: &str) -> Vec<Mesh> {
                 mesh.positions[3 * index3 + 2]
             );
 
+            let normal = Vector3::new(
+                mesh.normals[3 * index1],
+                mesh.normals[3 * index1 + 1],
+                mesh.normals[3 * index1 + 2],
+            );
 
-            let triangle = Triangle::new(v0, v1, v2, None, None);
+
+            let triangle = Triangle::new(v0, v1, v2, normal);
             triangles.push(triangle);
         }
 
-        meshes.push(Mesh::new(Some(material), triangles, m.name.clone()));
+        meshes.push(Mesh::new(material, triangles, m.name.clone()));
     }
 
     meshes

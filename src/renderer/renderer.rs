@@ -1,5 +1,5 @@
 use crate::math::vec3::Vector3;
-use crate::renderables::renderable::Renderable;
+use crate::renderables::renderable::{Renderable, IntersectionData};
 use crate::renderer::scene::Scene;
 use crate::renderer::camera::Camera;
 use crate::math::ray::Ray;
@@ -23,24 +23,19 @@ impl Renderer {
         }
     }
 
-    fn calculate_light(&self, ray: &Ray, hit_distance: f32, renderable: &Box<dyn Renderable>, lights: &Vec<Light>) -> Color {
+    fn calculate_light(&self, ray: &Ray, intersection_data: IntersectionData, renderable: &Box<dyn Renderable>, lights: &Vec<Light>) -> Color {
+        let material = renderable.get_material();
+
         let mut color = Color::new(0.,0.,0.);
         let mut albedo = Color::new(0.,0.,0.);
 
-        let mut roughness = 0.5;
-        let mut metalness = 0.5;
+        albedo = *material.get_albedo();
 
-        match renderable.get_material() {
-            Some(material) => {
-                albedo = *material.get_albedo();
-                metalness = material.metalness;
-                roughness = material.roughness;
-            },
-            _ => {},
-        };
+        let mut roughness = material.roughness;
+        let mut metalness = material.metalness;
 
-        let hit_point = &ray.origin + &(ray.direction * hit_distance);
-        let renderable_normal = renderable.get_normal(&hit_point);
+        let hit_point = &ray.origin + &(ray.direction * intersection_data.distance);
+        let renderable_normal = intersection_data.normal;
 
         for light in lights {
             let mut light_direction = &light.position - &hit_point;
@@ -79,13 +74,14 @@ impl Renderer {
 
         let mut near = std::f32::INFINITY;
         let mut intersected_renderable = None;
+        let mut result_intersected_data:Option<IntersectionData> = None;
 
         for renderable in scene.get_renderables() {
             match renderable.intersects(&ray) {
-                Some(point) => {
-                    if point < near {
-                        near = point;
-
+                Some(intersection_data) => {
+                    if intersection_data.distance < near {
+                        near = intersection_data.distance;
+                        result_intersected_data = Some(intersection_data);
                         intersected_renderable = Some(renderable);
                     }
                 },
@@ -95,7 +91,7 @@ impl Renderer {
 
         match intersected_renderable {
             Some(renderable) => {
-                pixel_color = self.calculate_light(&ray, near, &renderable, &lights);
+                pixel_color = self.calculate_light(&ray, result_intersected_data.unwrap(), &renderable, &lights);
             },
             None => {},
         }

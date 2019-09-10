@@ -13,7 +13,7 @@ impl CameraController  {
 
     pub fn update(&mut self, camera: &mut Camera, event_pump: &EventPump) {
         if event_pump.mouse_state().is_mouse_button_pressed(MouseButton::Left) {
-            let state = event_pump.relative_mouse_state();
+            let state = event_pump.mouse_state();
             println!("Relative - X = {:?}, Y = {:?}", state.x(), state.y());
 
             let mut position = camera.position().clone();

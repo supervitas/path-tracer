@@ -1,4 +1,4 @@
-use crate::renderables::renderable::Renderable;
+use crate::renderables::renderable::{Renderable, IntersectionData};
 use crate::math::ray::Ray;
 use crate::math::vec3::Vector3;
 use crate::renderables::material::Material;
@@ -6,14 +6,14 @@ use crate::renderables::triangle::Triangle;
 use crate::math::bbox::BBox;
 
 pub struct Mesh {
-    material: Option<Material>,
+    material: Material,
     triangles: Vec<Triangle>,
     bbox: BBox,
     name: String,
 }
 
 impl Mesh {
-    pub fn new(material: Option<Material>, triangles: Vec<Triangle>, name: String) -> Self {
+    pub fn new(material: Material, triangles: Vec<Triangle>, name: String) -> Self {
         let bbox = BBox::new_from_triangles(&triangles);
 
         Mesh {
@@ -26,20 +26,19 @@ impl Mesh {
 }
 
 impl Renderable for Mesh {
-    fn intersects(&self, ray: &Ray) -> Option<f32> {
+    fn intersects(&self, ray: &Ray) -> Option<IntersectionData> {
         if !self.bbox.ray_intersect_box(ray) {
             return None;
         }
 
         let mut min_distance = std::f32::MAX;
-
-        let mut is_intersecting = false;
+        let mut intersected_triangle: Option<&Triangle> = None;
 
         for triangle in &self.triangles {
             match triangle.intersects(ray) {
                 Some(distance) => {
                     if min_distance > distance {
-                        is_intersecting = true;
+                        intersected_triangle = Some(triangle);
                         min_distance = distance;
                     }
                 },
@@ -47,22 +46,20 @@ impl Renderable for Mesh {
             };
         }
 
-        match is_intersecting {
-            false => {
+        match intersected_triangle {
+             Some(triangle) => {
+                 return  Some(IntersectionData{
+                     distance: min_distance,
+                     normal: triangle.get_normal()
+                 })
+             }
+            _ => {
                 return None;
-            },
-            _ => {Some(min_distance)}
+            }
         }
     }
 
-    fn get_material(&self) -> Option<&Material> {
-        match &self.material {
-            Some(material) => Some(material),
-            None => None,
-        }
-    }
-
-    fn get_normal(&self, hit: &Vector3<f32>) -> Vector3<f32> {
-        Vector3::new(0.,0.,0.) // todo
+    fn get_material(&self) -> &Material {
+        &self.material
     }
 }

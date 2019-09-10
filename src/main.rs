@@ -84,15 +84,13 @@ pub fn main() {
 fn add_test_renderables(scene: &mut Scene) {
     let material = Material::new(Color::new(80.,  10., 15.));
     let sphere = Sphere::new(1.5, Vector3::new( -5. , 10., -5.),
-                                 Some(material));
+                                 material);
 
     let mut plane_material = Material::new(Color::new(0.,  255., 255.0));
     plane_material.metalness = 1.;
     plane_material.roughness = 0.;
 
-    let plane = Plane::new(Vector3::new(0.,0., -5.),
-                               Some(plane_material),
-                               Vector3::new(0., 1.,0.));
+    let plane = Plane::new(Vector3::new(0.,0., -5.), plane_material, Vector3::new(0., 1.,0.));
 
     scene.add_renderable(Box::new(sphere));
     scene.add_renderable(Box::new(plane));
