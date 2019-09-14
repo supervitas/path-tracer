@@ -19,10 +19,12 @@ pub fn load_obj(path: &str) -> Vec<Mesh> {
 
         let mat = &materials[mesh.material_id.unwrap()];
         let diffuse_color = Color::new(
-            mat.diffuse[0],
-            mat.diffuse[1],
-            mat.diffuse[2]
+            mat.diffuse[0] * 255.,
+            mat.diffuse[1] * 255.,
+            mat.diffuse[2] * 255.
         );
+
+        print!("{}", diffuse_color);
 
         let material = Material::new(diffuse_color);
 
@@ -51,14 +53,7 @@ pub fn load_obj(path: &str) -> Vec<Mesh> {
                 mesh.positions[3 * index3 + 2]
             );
 
-            let normal = Vector3::new(
-                mesh.normals[3 * index1],
-                mesh.normals[3 * index1 + 1],
-                mesh.normals[3 * index1 + 2],
-            );
-
-
-            let triangle = Triangle::new(v0, v1, v2, normal);
+            let triangle = Triangle::new(v0, v1, v2);
             triangles.push(triangle);
         }
 

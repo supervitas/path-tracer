@@ -48,7 +48,7 @@ impl Renderable for Mesh {
 
         match intersected_triangle {
              Some(triangle) => {
-                 return  Some(IntersectionData{
+                 return Some(IntersectionData {
                      distance: min_distance,
                      normal: triangle.get_normal()
                  })

@@ -16,11 +16,11 @@ impl CameraController  {
             let state = event_pump.mouse_state();
             println!("Relative - X = {:?}, Y = {:?}", state.x(), state.y());
 
-            let mut position = camera.position().clone();
-            position.x += state.x() as f32;
-            position.y += state.y() as f32;
-
-            camera.set_position(position);
+//            let mut position = camera.position().clone();
+//            position.x += state.x() as f32;
+//            position.y += state.y() as f32;
+//
+//            camera.set_position(position);
         }
     }
 }

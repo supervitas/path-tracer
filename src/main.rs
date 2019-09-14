@@ -25,15 +25,18 @@ use pathtracer::math::color::Color;
 
 use pathtracer::renderer::camera_controller::CameraController;
 
+extern crate ocl;
+use ocl::ProQue;
+
 pub fn main() {
     let width = 800;
     let height = 600;
 
     let mut scene = Scene::new(Color::new(0., 233., 255.));
-    let light = Light::new(Color::new(255., 255., 255.), 10.2, Vector3::new(2., 20., -10.));
+    let light = Light::new(Color::new(255., 255., 255.), 1.2, Vector3::new(2., 20., 10.));
     scene.add_light(light);
 
-    scene.load_model(String::from("./assets/simple.obj"));
+    scene.load_model(String::from("./assets/chair.obj"));
     add_test_renderables(&mut scene);
 
     let mut camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,5.,20.), Vector3::new(0.,0.,1.));
@@ -72,7 +75,6 @@ pub fn main() {
         camera_controller.update(&mut camera, &event_pump);
         let image = renderer.render(&scene, &camera);
 
-
         display.show(&mut canvas, &image);
 
         println!("Render time: {}", now.elapsed().as_millis());
@@ -94,4 +96,32 @@ fn add_test_renderables(scene: &mut Scene) {
 
     scene.add_renderable(Box::new(sphere));
     scene.add_renderable(Box::new(plane));
+}
+
+fn trivial() -> ocl::Result<()> {
+    let src = r#"
+        __kernel void add(__global float* buffer, float scalar) {
+            buffer[get_global_id(0)] += scalar;
+        }
+    "#;
+
+    let pro_que = ProQue::builder()
+        .src(src)
+        .dims(1 << 20)
+        .build()?;
+
+    let buffer = pro_que.create_buffer::<f32>()?;
+
+    let kernel = pro_que.kernel_builder("add")
+        .arg(&buffer)
+        .arg(10.0f32)
+        .build()?;
+
+    unsafe { kernel.enq()?; }
+
+    let mut vec = vec![0.0f32; buffer.len()];
+    buffer.read(&mut vec).enq()?;
+
+    println!("The value at index [{}] is now '{}'!", 200007, vec[200007]);
+    Ok(())
 }

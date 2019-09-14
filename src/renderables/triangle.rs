@@ -13,9 +13,15 @@ pub struct Triangle {
 }
 
 impl Triangle {
-    pub fn new(v0: Vector3<f32>, v1: Vector3<f32>, v2: Vector3<f32>, normal: Vector3<f32>) -> Self {
+    pub fn new(v0: Vector3<f32>, v1: Vector3<f32>, v2: Vector3<f32>) -> Self {
         let edge1 = &v1.clone() - &v0;
         let edge2 = &v2.clone() - &v0;
+
+        let normal = {
+            let mut edge1 = edge1.clone();
+            edge1.cross(&edge2).normalize();
+            edge1
+        };
 
         Triangle {
             v0,
@@ -27,16 +33,12 @@ impl Triangle {
         }
     }
 
-    pub fn get_triangle_normal(&self) -> &Vector3<f32> {
-        &self.normal
-    }
-
     pub fn get_vertices(&self) -> [&Vector3<f32>; 3] {
         [&self.v0, &self.v1, &self.v2]
     }
 
     pub fn get_normal(&self) -> Vector3<f32> {
-        self.normal
+        self.normal.clone()
     }
 
     pub fn intersects(&self, ray: &Ray) -> Option<f32> {

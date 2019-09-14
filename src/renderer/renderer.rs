@@ -74,7 +74,7 @@ impl Renderer {
 
         let mut near = std::f32::INFINITY;
         let mut intersected_renderable = None;
-        let mut result_intersected_data:Option<IntersectionData> = None;
+        let mut result_intersected_data: Option<IntersectionData> = None;
 
         for renderable in scene.get_renderables() {
             match renderable.intersects(&ray) {
