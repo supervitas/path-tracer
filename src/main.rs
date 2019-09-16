@@ -36,7 +36,7 @@ pub fn main() {
     let light = Light::new(Color::new(255., 255., 255.), 1.2, Vector3::new(2., 20., 10.));
     scene.add_light(light);
 
-    scene.load_model(String::from("./assets/chair.obj"));
+//    scene.load_model(String::from("./assets/chair.obj"));
     add_test_renderables(&mut scene);
 
     let mut camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,5.,20.), Vector3::new(0.,0.,1.));
@@ -84,17 +84,27 @@ pub fn main() {
 }
 
 fn add_test_renderables(scene: &mut Scene) {
-    let material = Material::new(Color::new(80.,  10., 15.));
-    let sphere = Sphere::new(1.5, Vector3::new( -5. , 10., -5.),
+    for i in 0..6 {
+        let step = i as f32;
+        let material = Material::new(Color::new(80.,  10., 15.));
+        let sphere = Sphere::new(1.5, Vector3::new( -10. + step * 4. , 2., -10.),
                                  material);
+        scene.add_renderable(Box::new(sphere));
+    }
+
+    for i in 0..6 {
+        let step = i as f32;
+        let material = Material::new(Color::new(80.,  10., 15.));
+        let sphere = Sphere::new(1.5, Vector3::new( 10. - step * 4. , 2., -2.),
+                                 material);
+        scene.add_renderable(Box::new(sphere));
+    }
 
     let mut plane_material = Material::new(Color::new(0.,  255., 255.0));
     plane_material.metalness = 1.;
     plane_material.roughness = 0.;
 
     let plane = Plane::new(Vector3::new(0.,0., -5.), plane_material, Vector3::new(0., 1.,0.));
-
-    scene.add_renderable(Box::new(sphere));
     scene.add_renderable(Box::new(plane));
 }
 
