@@ -26,6 +26,12 @@ impl <T: Float> Matrix4 <T> where T: Float + DivAssign {
         self.elements[11] = z;
     }
 
+    pub fn from_array(elements: [T; 16]) -> Self {
+        Matrix4 {
+            elements
+        }
+    }
+
     pub fn set(&mut self, elements: [T; 16])  {
         self.elements = elements;
     }
@@ -102,7 +108,7 @@ impl Matrix4<f32> {
         result
     }
 
-    pub fn rotate_x (&mut self, theta: f32) {
+    pub fn rotate_x(&mut self, theta: f32) {
         let c = f32::cos( theta );
         let  s = f32::sin( theta );
 
@@ -152,14 +158,3 @@ impl <T: Float> PartialEq for Matrix4<T> {
         equal
     }
 }
-
-//impl Mul<f32> for Matrix4<f32> {
-//    type Output = Self;
-//
-//    fn mul(&mut self, other: f32)  {
-//
-//        for i in 0..16 {
-//            self.elements[i] = other * self.elements[i];
-//        }
-//    }
-//}
