@@ -39,8 +39,8 @@ pub fn main() {
 //    scene.load_model(String::from("./assets/chair.obj"));
     add_test_renderables(&mut scene);
 
-    let mut camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,5.,20.), Vector3::new(0.,0.,1.));
-    let mut camera_controller = CameraController::new();
+    let mut camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,15.,20.));
+    let mut camera_controller = CameraController::new(&camera);
 
     let mut renderer = Renderer::new(width, height);
 
@@ -77,7 +77,7 @@ pub fn main() {
 
         display.show(&mut canvas, &image);
 
-        println!("Render time: {}", now.elapsed().as_millis());
+//        println!("Render time: {}", now.elapsed().as_millis());
 
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }

@@ -53,21 +53,6 @@ impl Renderer {
         color
     }
 
-    fn get_camera_ray(&self, camera: &Camera, x: u32, y: u32) -> Ray {
-        let fov_adjustment = (45.0_f32.to_radians() / 2.0).tan();
-        let aspect_ratio = (self.width as f32) / (self.height as f32);
-        let dir_x = ((((x as f32 + 0.5) / self.width as f32) * 2.0 - 1.0) * aspect_ratio) * fov_adjustment;
-        let dir_y = (1.0 - ((y as f32 + 0.5) / self.height as f32) * 2.0) * fov_adjustment;
-
-        let mut direction = Vector3::new(dir_x, dir_y, -1.0);
-        direction.normalize();
-
-        Ray {
-            origin: camera.position().clone(),
-            direction
-        }
-    }
-
     fn check_intersections(&self, ray: Ray, scene: &Scene) -> Color {
         let mut pixel_color = scene.get_background().clone();
         let lights = scene.get_lights();
@@ -103,7 +88,7 @@ impl Renderer {
         for h in 0..self.height {
             for w in 0..self.width {
                 let offset = (h * self.width * 3 + w * 3) as usize;
-                let camera_ray = self.get_camera_ray(&camera, w, h);
+                let camera_ray = camera.get_camera_ray(w, h, self.width, self.height);
                 let color = self.check_intersections(camera_ray, scene).as_u8();
 
                 self.image[offset] = color[0];

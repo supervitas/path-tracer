@@ -150,7 +150,7 @@ impl <T: Float> PartialEq for Matrix4<T> {
         let mut equal = true;
 
         for (i, item) in self.elements.iter().enumerate() {
-            if *item != other.elements[i] {
+            if *item != other.elements[i] as T {
                 equal = false;
             }
         }

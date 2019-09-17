@@ -1,6 +1,6 @@
 use std::fmt;
 use std::ops::{Mul, Add, DivAssign,  Neg};
-use num::{Float};
+use num::{Float, clamp};
 use core::ops;
 
 #[derive(Clone, Copy, Debug)]
@@ -47,6 +47,11 @@ impl <T: Float> Vector3 <T> where T: Float + DivAssign {
 
     pub fn magnitude(&self) -> T {
         (self.x.powi(2) + self.y.powi(2) + self.z.powi(2)).sqrt()
+    }
+
+    pub fn angle_between(&self, v2: &Vector3<T>) -> T {
+        let theta = self.dot( &v2 ) / Float::sqrt( self.dot(&self) * v2.dot(&v2) );
+        Float::acos( theta)
     }
 
     pub fn divide(&mut self, scalar: T) -> &mut Self {

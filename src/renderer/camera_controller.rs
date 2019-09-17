@@ -17,10 +17,12 @@ pub struct CameraController {
 }
 
 impl CameraController  {
-    pub fn new() -> Self {
+    pub fn new(cam: &Camera) -> Self {
+       let cam_position = cam.position();
+
        CameraController {
-           theta: 0.,
-           phi: 0.,
+           theta: f32::atan(f32::sqrt((f32::powi(cam_position.x, 2) + f32::powi(cam_position.y, 2))) / cam_position.z),
+           phi: f32::atan2(cam_position.y, cam_position.x),
            min_polar_angle: 0.2,
            max_polar_angle: PI / 2.5,
            radius: 10.,
@@ -39,9 +41,10 @@ impl CameraController  {
             let sencitivity = 0.1;
 //            println!("Relative - X = {:?}, Y = {:?}", state.x(), state.y());
 
-            self.theta = num::clamp(self.theta + (y - self.last_y) / sencitivity, self.min_polar_angle, self.max_polar_angle );
+            self.theta = num::clamp(self.theta + (y - self.last_y), self.min_polar_angle, self.max_polar_angle );
+            self.phi = self.phi - (x - self.last_x);
 
-            self.phi = self.phi - (x - self.last_x) / sencitivity;
+            println!("{}, {}", self.theta, self.phi);
 
             self.last_x = x;
             self.last_y = y;
@@ -58,15 +61,13 @@ impl CameraController  {
 
             camera.multiply(&x_rot_matrix);
             camera.multiply(&y_rot_matrix);
-//            mat4.multiply(camera, x_rot_matrix, camera);
-//            mat4.multiply(camera, y_rot_matrix, camera);
 
-            let position = Vector3::new(camera.elements[12], camera.elements[13], camera.elements[14]);
-            let look_at = Matrix4::look_at(&position, cam.target());
+            let cam_focus_vector = cam.position() - cam.target();
 
-//            this._camera.position.set({x: camera[12], y: camera[13], z: camera[14]});
 
-            cam.set_position(Vector3::new(camera.elements[12], camera.elements[13], camera.elements[14]))
+            let look_at = Matrix4::look_at(&cam_focus_vector, cam.target());
+
+            cam.set_position(Vector3::new(look_at.elements[12], look_at.elements[13], look_at.elements[14]))
 
         } else {
             self.last_x = 0.0;

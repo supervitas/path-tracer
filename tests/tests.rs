@@ -28,6 +28,14 @@ mod tests {
     }
 
     #[test]
+    fn angle_between_two_v() {
+        let v1 = Vector3::new(10., 30., 40.);
+        let v2 = Vector3::new(20., 3., 4.);
+
+        assert_eq!(1.1284221038181517, v1.angle_between(&v2));
+    }
+
+    #[test]
     fn look_at() {
         let origin = Vector3::new(0.,5.,0.);
         let target = Vector3::new(0.,0.,0.);
