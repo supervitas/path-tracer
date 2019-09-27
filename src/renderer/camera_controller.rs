@@ -65,9 +65,10 @@ impl CameraController  {
             let cam_focus_vector = cam.position() - cam.target();
 
 
-            let look_at = Matrix4::look_at(&cam_focus_vector, cam.target());
+//            let look_at = Matrix4::look_at(&cam_focus_vector, cam.target());
 
-            cam.set_position(Vector3::new(look_at.elements[12], look_at.elements[13], look_at.elements[14]))
+//            cam.set_position(Vector3::new(look_at.elements[12], look_at.elements[13], look_at.elements[14]))
+            cam.update_camera_world();
 
         } else {
             self.last_x = 0.0;

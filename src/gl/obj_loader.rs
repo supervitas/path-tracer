@@ -8,10 +8,10 @@ use crate::math::color::Color;
 
 
 pub fn load_obj(path: &str) -> Vec<Mesh> {
-    let cornell_box = tobj::load_obj(&Path::new(path));
-    assert!(cornell_box.is_ok());
+    let model = tobj::load_obj(&Path::new(path));
+    assert!(model.is_ok());
 
-    let (models, materials) = cornell_box.unwrap();
+    let (models, materials) = model.unwrap();
     let mut meshes: Vec<Mesh> = Vec::new();
 
     for (i, m) in models.iter().enumerate() {

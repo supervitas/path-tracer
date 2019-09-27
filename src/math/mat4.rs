@@ -1,7 +1,8 @@
 use std::ops::{Mul, Add, DivAssign, Neg};
-use num::{Float};
+use num::{Float, NumCast};
 use core::ops;
 use crate::math::vec3::Vector3;
+use std::convert::TryFrom;
 
 #[derive(Clone, Copy, Debug)]
 pub struct Matrix4 <T: Float> {
@@ -67,6 +68,136 @@ impl <T: Float> Matrix4 <T> where T: Float + DivAssign {
         self.elements[ 11 ] = a41 * b13 + a42 * b23 + a43 * b33 + a44 * b43;
         self.elements[ 15 ] = a41 * b14 + a42 * b24 + a43 * b34 + a44 * b44;
     }
+
+    pub fn get_inverse (&mut self) {
+        let mut te = self.elements;
+        let me = self.elements;
+
+        let n11 = me[ 0 ]; let n21 = me[ 1 ]; let n31 = me[ 2 ]; let n41 = me[ 3 ];
+        let n12 = me[ 4 ]; let n22 = me[ 5 ]; let n32 = me[ 6 ]; let n42 = me[ 7 ];
+        let n13 = me[ 8 ]; let n23 = me[ 9 ]; let n33 = me[ 10 ]; let n43 = me[ 11 ];
+        let n14 = me[ 12 ]; let n24 = me[ 13 ]; let n34 = me[ 14 ]; let n44 = me[ 15 ];
+
+        let t11 = n23 * n34 * n42 - n24 * n33 * n42 + n24 * n32 * n43 - n22 * n34 * n43 - n23 * n32 * n44 + n22 * n33 * n44;
+        let t12 = n14 * n33 * n42 - n13 * n34 * n42 - n14 * n32 * n43 + n12 * n34 * n43 + n13 * n32 * n44 - n12 * n33 * n44;
+        let t13 = n13 * n24 * n42 - n14 * n23 * n42 + n14 * n22 * n43 - n12 * n24 * n43 - n13 * n22 * n44 + n12 * n23 * n44;
+        let t14 = n14 * n23 * n32 - n13 * n24 * n32 - n14 * n22 * n33 + n12 * n24 * n33 + n13 * n22 * n34 - n12 * n23 * n34;
+
+        let det = n11 * t11 + n21 * t12 + n31 * t13 + n41 * t14;
+
+        if det == T::from(0.).unwrap()  {
+            println!("can't invert matrix, determinant is 0, return identity");
+            let identity =  Matrix4::identity();
+            let elements = Matrix4::arr_to_template(&identity.elements);
+            self.elements = elements;
+            return;
+        }
+
+        let det_inv = T::from(1.).unwrap() / det;
+
+        te[ 0 ] = t11 * det_inv;
+        te[ 1 ] = ( n24 * n33 * n41 - n23 * n34 * n41 - n24 * n31 * n43 + n21 * n34 * n43 + n23 * n31 * n44 - n21 * n33 * n44 ) * det_inv;
+        te[ 2 ] = ( n22 * n34 * n41 - n24 * n32 * n41 + n24 * n31 * n42 - n21 * n34 * n42 - n22 * n31 * n44 + n21 * n32 * n44 ) * det_inv;
+        te[ 3 ] = ( n23 * n32 * n41 - n22 * n33 * n41 - n23 * n31 * n42 + n21 * n33 * n42 + n22 * n31 * n43 - n21 * n32 * n43 ) * det_inv;
+
+        te[ 4 ] = t12 * det_inv;
+        te[ 5 ] = ( n13 * n34 * n41 - n14 * n33 * n41 + n14 * n31 * n43 - n11 * n34 * n43 - n13 * n31 * n44 + n11 * n33 * n44 ) * det_inv;
+        te[ 6 ] = ( n14 * n32 * n41 - n12 * n34 * n41 - n14 * n31 * n42 + n11 * n34 * n42 + n12 * n31 * n44 - n11 * n32 * n44 ) * det_inv;
+        te[ 7 ] = ( n12 * n33 * n41 - n13 * n32 * n41 + n13 * n31 * n42 - n11 * n33 * n42 - n12 * n31 * n43 + n11 * n32 * n43 ) * det_inv;
+
+        te[ 8 ] = t13 * det_inv;
+        te[ 9 ] = ( n14 * n23 * n41 - n13 * n24 * n41 - n14 * n21 * n43 + n11 * n24 * n43 + n13 * n21 * n44 - n11 * n23 * n44 ) * det_inv;
+        te[ 10 ] = ( n12 * n24 * n41 - n14 * n22 * n41 + n14 * n21 * n42 - n11 * n24 * n42 - n12 * n21 * n44 + n11 * n22 * n44 ) * det_inv;
+        te[ 11 ] = ( n13 * n22 * n41 - n12 * n23 * n41 - n13 * n21 * n42 + n11 * n23 * n42 + n12 * n21 * n43 - n11 * n22 * n43 ) * det_inv;
+
+        te[ 12 ] = t14 * det_inv;
+        te[ 13 ] = ( n13 * n24 * n31 - n14 * n23 * n31 + n14 * n21 * n33 - n11 * n24 * n33 - n13 * n21 * n34 + n11 * n23 * n34 ) * det_inv;
+        te[ 14 ] = ( n14 * n22 * n31 - n12 * n24 * n31 - n14 * n21 * n32 + n11 * n24 * n32 + n12 * n21 * n34 - n11 * n22 * n34 ) * det_inv;
+        te[ 15 ] = ( n12 * n23 * n31 - n13 * n22 * n31 + n13 * n21 * n32 - n11 * n23 * n32 - n12 * n21 * n33 + n11 * n22 * n33 ) * det_inv;
+    }
+
+    pub fn rotate_y(&mut self, theta: f32) {
+        let c = f32::cos( theta );
+        let s = f32::sin( theta );
+
+        self.set(Matrix4::arr_to_template(&[
+            c, 0., s, 0.,
+            0., 1., 0., 0.,
+            - s, 0., c, 0.,
+            0., 0., 0., 1.
+        ]));
+    }
+
+    pub fn rotate_z(&mut self, theta: f32) {
+        let c = f32::cos(theta);
+        let s = f32::sin(theta);
+
+        self.set(Matrix4::arr_to_template(&[
+            c, -s, 0., 0.,
+            s, c, 0., 0.,
+            0., 0., 1., 0.,
+            0., 0., 0., 1.
+        ]));
+    }
+
+    pub fn rotate_x(&mut self, theta: f32) {
+        let c = f32::cos( theta );
+        let  s = f32::sin( theta );
+
+        self.set(Matrix4::arr_to_template(&[
+            1., 0., 0., 0.,
+            0., c, - s, 0.,
+            0., s, c, 0.,
+            0., 0., 0., 1.
+        ]));
+    }
+
+    pub fn from_axis_angle(axis: &Vector3<T>, angle: T) -> Self {
+        let c = Float::cos( angle );
+        let s = Float::sin( angle );
+        let t = T::from(1.).unwrap() - c;
+        let x = T::from(axis.x).unwrap();
+        let y = T::from(axis.y).unwrap();
+        let z = T::from(axis.z).unwrap();
+
+        let tx = t * x;
+        let ty = t * y;
+
+        Matrix4::new([
+            tx * x + c, tx * y - s * z, tx * z + s * y, T::from(0.).unwrap(),
+            tx * y + s * z, ty * y + c, ty * z - s * x, T::from(0.).unwrap(),
+            tx * z - s * y, ty * z + s * x, t * z * z + c, T::from(0.).unwrap(),
+            T::from(0.).unwrap(), T::from(0.).unwrap(), T::from(0.).unwrap(), T::from(1.).unwrap()
+        ])
+    }
+
+    pub fn look_at(position: &Vector3<T>, target: &Vector3<T>) -> Self {
+        let mut forward = position - target;
+        forward.normalize();
+
+        let mut right = Vector3::new(T::from(0.).unwrap(),T::from(1.).unwrap(),T::from(0.).unwrap());
+        right.cross(&forward);
+        let mut up = forward.clone();
+        up.cross(&right);
+
+        let elements = [
+            right.x, right.y, right.z, T::from(0.).unwrap(),
+            up.x, up.y, up.z, T::from(0.).unwrap(),
+            forward.x, forward.y, forward.z, T::from(0.).unwrap(),
+            position.x, position.y, position.z, T::from(1.).unwrap()
+        ];
+
+        Matrix4::from_array(elements)
+    }
+
+    fn arr_to_template(arr: &[f32; 16]) -> [T; 16] {
+        <_>::try_from(
+            &*arr
+                .into_iter()
+                .map(|it| T::from(it.clone()).unwrap())
+                .collect::<Vec<_>>()
+        ).unwrap()
+    }
 }
 
 impl Matrix4<f32> {
@@ -78,70 +209,6 @@ impl Matrix4<f32> {
                 0.0, 0.0, 1.0, 0.0,
                 0.0, 0.0, 0.0, 1.0
             ])
-    }
-
-    pub fn look_at(position: &Vector3<f32>, target: &Vector3<f32>) -> Self {
-        let mut forward = position - target;
-        forward.normalize();
-
-        let mut right = Vector3::new(0.,1.,0.);
-        right.cross(&forward);
-        let mut up = forward.clone();
-        up.cross(&right);
-
-        let mut result = Matrix4::identity();
-
-        result.elements[0] = right.x;
-        result.elements[1] = right.y;
-        result.elements[2] = right.z;
-        result.elements[4] = up.x;
-        result.elements[5] = up.y;
-        result.elements[6] = up.z;
-        result.elements[8] = forward.x;
-        result.elements[9] = forward.y;
-        result.elements[10] = forward.z;
-
-        result.elements[12] = position.x;
-        result.elements[13] = position.y;
-        result.elements[14] = position.z;
-
-        result
-    }
-
-    pub fn rotate_x(&mut self, theta: f32) {
-        let c = f32::cos( theta );
-        let  s = f32::sin( theta );
-
-        self.set([
-            1., 0., 0., 0.,
-            0., c, - s, 0.,
-            0., s, c, 0.,
-            0., 0., 0., 1.
-        ]);
-    }
-
-    pub fn rotate_y(&mut self, theta: f32) {
-        let c = f32::cos( theta );
-        let  s = f32::sin( theta );
-
-        self.set([
-            c, 0., s, 0.,
-            0., 1., 0., 0.,
-            - s, 0., c, 0.,
-            0., 0., 0., 1.
-        ]);
-    }
-
-    pub fn rotate_z(&mut self, theta: f32) {
-        let c = f32::cos(theta);
-        let s = f32::sin(theta);
-
-        self.set([
-            c, -s, 0., 0.,
-            s, c, 0., 0.,
-            0., 0., 1., 0.,
-            0., 0., 0., 1.
-        ]);
     }
 }
 

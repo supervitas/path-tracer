@@ -7,6 +7,7 @@ mod tests {
     use pathtracer::math::color::Color;
     use std::ops::Mul;
     use pathtracer::math::mat4::Matrix4;
+    use pathtracer::renderer::camera::Camera;
 
     #[test]
     fn cross_product() {
@@ -66,9 +67,47 @@ mod tests {
 
         mat.multiply(&second_mat);
 
-        let mut etalon = Matrix4::from_array([123., 198., 743., 605., 110., 227., 904., 490., 157., 298., 1169., 715., 217., 385., 1519., 952.]);
+        let etalon = Matrix4::from_array([123., 198., 743., 605., 110., 227., 904., 490., 157., 298., 1169., 715., 217., 385., 1519., 952.]);
 
         assert_eq!(mat, etalon);
+    }
+
+    #[test]
+    fn matrix_from_axis_angle() {
+        let mat = Matrix4::from_axis_angle(&Vector3::new(0.,0.,1.), std::f32::consts::PI);
+        let etalon = Matrix4::from_array([-1.0, -0.00000008742278, 0.0, 0.0, 0.00000008742278, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]);
+        assert_eq!(mat, etalon);
+    }
+
+    #[test]
+    fn vector_apply_matrix() {
+        let mut v1 = Vector3::new(1.,1., 1.);
+        let m1 = Matrix4::new([1.,2.,3.,4.,5.,6.,7.,8.,9.,10.,11.,12.,13.,14.,15.,16.]);
+
+        let etalon = Vector3::new( 0.1724137931034483,  0.4482758620689655, 0.7241379310344828);
+
+        v1.apply_matrix(&m1);
+        assert_eq!(v1, etalon);
+    }
+
+    #[test]
+    fn get_inverse_matrix() {
+        let mut mat = Matrix4::identity();
+        mat.get_inverse();
+
+        let etalon = Matrix4::identity();
+        assert_eq!(mat, etalon);
+    }
+
+    #[test]
+    fn camera_get_ray() {
+        let w = 800;
+        let h = 600;
+        let camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,5.,20.), Vector3::new(0.,0.,0.));
+
+        let ray = camera.get_camera_ray(400, 600, w, h);
+
+        print!("{}", ray.direction);
     }
 
     #[test]
