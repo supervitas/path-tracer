@@ -1,4 +1,4 @@
-use std::ops::{Mul, Add, DivAssign, Neg};
+use std::ops::{Mul, Add, DivAssign, Neg, AddAssign};
 use num::{Float, NumCast};
 use core::ops;
 use crate::math::vec3::Vector3;
@@ -9,7 +9,7 @@ pub struct Matrix4 <T: Float> {
     pub elements: [T; 16],
 }
 
-impl <T: Float> Matrix4 <T> where T: Float + DivAssign {
+impl <T: Float> Matrix4 <T> where T: Float + DivAssign + AddAssign {
     pub fn new(elements: [T; 16]) -> Self {
         Matrix4 {
             elements: [
@@ -19,6 +19,17 @@ impl <T: Float> Matrix4 <T> where T: Float + DivAssign {
                 elements[3], elements[7], elements[11], elements[15]
             ]
         }
+    }
+
+    pub fn identity() -> Self {
+        let elements = Matrix4::arr_to_template(&[
+            1.0, 0.0, 0.0, 0.0,
+            0.0, 1.0, 0.0, 0.0,
+            0.0, 0.0, 1.0, 0.0,
+            0.0, 0.0, 0.0, 1.0
+        ]);
+
+        Matrix4::from_array(elements)
     }
 
     pub fn translation(&mut self, x: T, y: T, z: T) {
@@ -69,9 +80,8 @@ impl <T: Float> Matrix4 <T> where T: Float + DivAssign {
         self.elements[ 15 ] = a41 * b14 + a42 * b24 + a43 * b34 + a44 * b44;
     }
 
-    pub fn get_inverse (&mut self) {
-        let mut te = self.elements;
-        let me = self.elements;
+    pub fn inverse (&mut self) {
+        let mut me = self.elements;
 
         let n11 = me[ 0 ]; let n21 = me[ 1 ]; let n31 = me[ 2 ]; let n41 = me[ 3 ];
         let n12 = me[ 4 ]; let n22 = me[ 5 ]; let n32 = me[ 6 ]; let n42 = me[ 7 ];
@@ -87,33 +97,31 @@ impl <T: Float> Matrix4 <T> where T: Float + DivAssign {
 
         if det == T::from(0.).unwrap()  {
             println!("can't invert matrix, determinant is 0, return identity");
-            let identity =  Matrix4::identity();
-            let elements = Matrix4::arr_to_template(&identity.elements);
-            self.elements = elements;
+            self.elements =  Matrix4::identity().elements;
             return;
         }
 
         let det_inv = T::from(1.).unwrap() / det;
 
-        te[ 0 ] = t11 * det_inv;
-        te[ 1 ] = ( n24 * n33 * n41 - n23 * n34 * n41 - n24 * n31 * n43 + n21 * n34 * n43 + n23 * n31 * n44 - n21 * n33 * n44 ) * det_inv;
-        te[ 2 ] = ( n22 * n34 * n41 - n24 * n32 * n41 + n24 * n31 * n42 - n21 * n34 * n42 - n22 * n31 * n44 + n21 * n32 * n44 ) * det_inv;
-        te[ 3 ] = ( n23 * n32 * n41 - n22 * n33 * n41 - n23 * n31 * n42 + n21 * n33 * n42 + n22 * n31 * n43 - n21 * n32 * n43 ) * det_inv;
+        me[ 0 ] = t11 * det_inv;
+        me[ 1 ] = ( n24 * n33 * n41 - n23 * n34 * n41 - n24 * n31 * n43 + n21 * n34 * n43 + n23 * n31 * n44 - n21 * n33 * n44 ) * det_inv;
+        me[ 2 ] = ( n22 * n34 * n41 - n24 * n32 * n41 + n24 * n31 * n42 - n21 * n34 * n42 - n22 * n31 * n44 + n21 * n32 * n44 ) * det_inv;
+        me[ 3 ] = ( n23 * n32 * n41 - n22 * n33 * n41 - n23 * n31 * n42 + n21 * n33 * n42 + n22 * n31 * n43 - n21 * n32 * n43 ) * det_inv;
 
-        te[ 4 ] = t12 * det_inv;
-        te[ 5 ] = ( n13 * n34 * n41 - n14 * n33 * n41 + n14 * n31 * n43 - n11 * n34 * n43 - n13 * n31 * n44 + n11 * n33 * n44 ) * det_inv;
-        te[ 6 ] = ( n14 * n32 * n41 - n12 * n34 * n41 - n14 * n31 * n42 + n11 * n34 * n42 + n12 * n31 * n44 - n11 * n32 * n44 ) * det_inv;
-        te[ 7 ] = ( n12 * n33 * n41 - n13 * n32 * n41 + n13 * n31 * n42 - n11 * n33 * n42 - n12 * n31 * n43 + n11 * n32 * n43 ) * det_inv;
+        me[ 4 ] = t12 * det_inv;
+        me[ 5 ] = ( n13 * n34 * n41 - n14 * n33 * n41 + n14 * n31 * n43 - n11 * n34 * n43 - n13 * n31 * n44 + n11 * n33 * n44 ) * det_inv;
+        me[ 6 ] = ( n14 * n32 * n41 - n12 * n34 * n41 - n14 * n31 * n42 + n11 * n34 * n42 + n12 * n31 * n44 - n11 * n32 * n44 ) * det_inv;
+        me[ 7 ] = ( n12 * n33 * n41 - n13 * n32 * n41 + n13 * n31 * n42 - n11 * n33 * n42 - n12 * n31 * n43 + n11 * n32 * n43 ) * det_inv;
 
-        te[ 8 ] = t13 * det_inv;
-        te[ 9 ] = ( n14 * n23 * n41 - n13 * n24 * n41 - n14 * n21 * n43 + n11 * n24 * n43 + n13 * n21 * n44 - n11 * n23 * n44 ) * det_inv;
-        te[ 10 ] = ( n12 * n24 * n41 - n14 * n22 * n41 + n14 * n21 * n42 - n11 * n24 * n42 - n12 * n21 * n44 + n11 * n22 * n44 ) * det_inv;
-        te[ 11 ] = ( n13 * n22 * n41 - n12 * n23 * n41 - n13 * n21 * n42 + n11 * n23 * n42 + n12 * n21 * n43 - n11 * n22 * n43 ) * det_inv;
+        me[ 8 ] = t13 * det_inv;
+        me[ 9 ] = ( n14 * n23 * n41 - n13 * n24 * n41 - n14 * n21 * n43 + n11 * n24 * n43 + n13 * n21 * n44 - n11 * n23 * n44 ) * det_inv;
+        me[ 10 ] = ( n12 * n24 * n41 - n14 * n22 * n41 + n14 * n21 * n42 - n11 * n24 * n42 - n12 * n21 * n44 + n11 * n22 * n44 ) * det_inv;
+        me[ 11 ] = ( n13 * n22 * n41 - n12 * n23 * n41 - n13 * n21 * n42 + n11 * n23 * n42 + n12 * n21 * n43 - n11 * n22 * n43 ) * det_inv;
 
-        te[ 12 ] = t14 * det_inv;
-        te[ 13 ] = ( n13 * n24 * n31 - n14 * n23 * n31 + n14 * n21 * n33 - n11 * n24 * n33 - n13 * n21 * n34 + n11 * n23 * n34 ) * det_inv;
-        te[ 14 ] = ( n14 * n22 * n31 - n12 * n24 * n31 - n14 * n21 * n32 + n11 * n24 * n32 + n12 * n21 * n34 - n11 * n22 * n34 ) * det_inv;
-        te[ 15 ] = ( n12 * n23 * n31 - n13 * n22 * n31 + n13 * n21 * n32 - n11 * n23 * n32 - n12 * n21 * n33 + n11 * n22 * n33 ) * det_inv;
+        me[ 12 ] = t14 * det_inv;
+        me[ 13 ] = ( n13 * n24 * n31 - n14 * n23 * n31 + n14 * n21 * n33 - n11 * n24 * n33 - n13 * n21 * n34 + n11 * n23 * n34 ) * det_inv;
+        me[ 14 ] = ( n14 * n22 * n31 - n12 * n24 * n31 - n14 * n21 * n32 + n11 * n24 * n32 + n12 * n21 * n34 - n11 * n22 * n34 ) * det_inv;
+        me[ 15 ] = ( n12 * n23 * n31 - n13 * n22 * n31 + n13 * n21 * n32 - n11 * n23 * n32 - n12 * n21 * n33 + n11 * n22 * n33 ) * det_inv;
     }
 
     pub fn rotate_y(&mut self, theta: f32) {
@@ -142,7 +150,7 @@ impl <T: Float> Matrix4 <T> where T: Float + DivAssign {
 
     pub fn rotate_x(&mut self, theta: f32) {
         let c = f32::cos( theta );
-        let  s = f32::sin( theta );
+        let s = f32::sin( theta );
 
         self.set(Matrix4::arr_to_template(&[
             1., 0., 0., 0.,
@@ -171,23 +179,40 @@ impl <T: Float> Matrix4 <T> where T: Float + DivAssign {
         ])
     }
 
-    pub fn look_at(position: &Vector3<T>, target: &Vector3<T>) -> Self {
-        let mut forward = position - target;
-        forward.normalize();
+    pub fn look_at(&mut self, position: &Vector3<T>, target: &Vector3<T>, up: &Vector3<T>)  {
+        let mut _z = position - target;
 
-        let mut right = Vector3::new(T::from(0.).unwrap(),T::from(1.).unwrap(),T::from(0.).unwrap());
-        right.cross(&forward);
-        let mut up = forward.clone();
-        up.cross(&right);
+        let zero = T::from(0.).unwrap();
+        if _z.magnitude() == zero { // eye and target are in the same position
+            _z.z = T::from(1.).unwrap();
+        }
 
-        let elements = [
-            right.x, right.y, right.z, T::from(0.).unwrap(),
-            up.x, up.y, up.z, T::from(0.).unwrap(),
-            forward.x, forward.y, forward.z, T::from(0.).unwrap(),
-            position.x, position.y, position.z, T::from(1.).unwrap()
-        ];
+        _z.normalize();
 
-        Matrix4::from_array(elements)
+        let mut _x = up.clone();
+        _x.cross(&_z);
+
+        if  _x.magnitude() == zero  { // up and z are parallel
+            if T::abs(up.z) == T::from(1.).unwrap()  {
+                _z.x += T::epsilon();
+            } else {
+                _z.z += T::epsilon();
+            }
+
+            _z.normalize();
+            _x = up.clone();
+            _x.cross(&_z );
+        }
+
+        _x.normalize();
+        let mut _y = _z.clone();
+        _z.cross(&_x);
+
+        self.elements[ 0 ] = _x.x; self.elements[ 4 ] = _y.x; self.elements[ 8 ] = _z.x;
+        self.elements[ 1 ] = _x.y; self.elements[ 5 ] = _y.y; self.elements[ 9 ] = _z.y;
+        self.elements[ 2 ] = _x.z; self.elements[ 6 ] = _y.z; self.elements[ 10 ] = _z.z;
+
+//        Matrix4::from_array(elements)
     }
 
     fn arr_to_template(arr: &[f32; 16]) -> [T; 16] {
@@ -200,17 +225,6 @@ impl <T: Float> Matrix4 <T> where T: Float + DivAssign {
     }
 }
 
-impl Matrix4<f32> {
-    pub fn identity() -> Self {
-        Matrix4::new (
-            [
-                1.0, 0.0, 0.0, 0.0,
-                0.0, 1.0, 0.0, 0.0,
-                0.0, 0.0, 1.0, 0.0,
-                0.0, 0.0, 0.0, 1.0
-            ])
-    }
-}
 
 impl <T: Float> PartialEq for Matrix4<T> {
     fn eq(&self, other: &Matrix4<T>) -> bool {

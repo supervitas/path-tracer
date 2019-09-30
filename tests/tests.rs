@@ -38,14 +38,14 @@ mod tests {
 
     #[test]
     fn look_at() {
-        let origin = Vector3::new(0.,5.,0.);
+        let origin = Vector3::new(0.,5.,20.);
         let target = Vector3::new(0.,0.,0.);
+        let up = Vector3::new(0.,1.,0.);
 
-        let mat = Matrix4::look_at(&origin, &target);
+        let mut mat = Matrix4::identity();
+        mat.look_at(&origin, &target, &up);
 
-        let mut etalon = Matrix4::from_array([0.9999999999999999, 0., 0., 0., 0., 0.0000999999995, -0.9999999949999999, 0., 0., 0.999999995, 0.00009999999950000001, 0., 0., 0., 0., 1.]);
-
-
+        let mut etalon = Matrix4::from_array([1., 0., 0., 0., 0., 0.9701425001453319, -0.24253562503633297, 0., 0., 0.24253562503633297, 0.9701425001453319, 0., 0., 0., 0., 1.]);
         assert_eq!(mat, etalon);
     }
 
@@ -92,10 +92,16 @@ mod tests {
 
     #[test]
     fn get_inverse_matrix() {
-        let mut mat = Matrix4::identity();
-        mat.get_inverse();
+        let origin = Vector3::new(0.,5.,20.);
+        let target = Vector3::new(0.,0.,0.);
+        let up = Vector3::new(0.,1.,0.);
 
-        let etalon = Matrix4::identity();
+        let mut mat = Matrix4::identity();
+        mat.look_at(&origin, &target, &up);
+        mat.inverse();
+
+        let el =  [1., 0., 0., 0., 0., 0.9701425001453319, 0.24253562503633297, 0., 0., -0.24253562503633297, 0.9701425001453319, 0., 0., 0., 0., 1.];
+        let etalon: Matrix4<f64> = Matrix4::from_array(el);
         assert_eq!(mat, etalon);
     }
 

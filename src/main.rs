@@ -1,13 +1,8 @@
 extern crate sdl2;
 extern crate rand;
 
-use rand::Rng;
-
-use sdl2::pixels::PixelFormatEnum;
-use sdl2::rect::Rect;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-
 
 use pathtracer::renderer::camera::Camera;
 use pathtracer::math::vec3::Vector3;
@@ -16,7 +11,6 @@ use pathtracer::renderer::scene::Scene;
 use pathtracer::gl::display::Display;
 use pathtracer::renderables::material::Material;
 use pathtracer::renderables::sphere::Sphere;
-use pathtracer::renderables::triangle::Triangle;
 use pathtracer::gl::obj_loader::load_obj;
 use std::time::{Duration, Instant};
 use pathtracer::renderer::light::Light;
@@ -39,7 +33,7 @@ pub fn main() {
 //    scene.load_model(String::from("./assets/cornell_box/CornellBox-Sphere.obj"));
     add_test_renderables(&mut scene);
 
-    let mut camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,5.,20.), Vector3::new(0.,0.,0.));
+    let mut camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,15.,20.), Vector3::new(0.,0.,15.));
     let mut camera_controller = CameraController::new(&camera);
 
     let mut renderer = Renderer::new(width, height);
@@ -75,7 +69,7 @@ pub fn main() {
         camera_controller.update(&mut camera, &event_pump);
         let image = renderer.render(&scene, &camera);
 
-        display.show(&mut canvas, &image);
+        display.show(&mut canvas, &image).unwrap();
 
 //        println!("Render time: {}", now.elapsed().as_millis());
 
