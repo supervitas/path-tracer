@@ -19,9 +19,6 @@ use pathtracer::math::color::Color;
 
 use pathtracer::renderer::camera_controller::CameraController;
 
-extern crate ocl;
-use ocl::ProQue;
-
 pub fn main() {
     let width = 800;
     let height = 600;
@@ -33,7 +30,7 @@ pub fn main() {
 //    scene.load_model(String::from("./assets/cornell_box/CornellBox-Sphere.obj"));
     add_test_renderables(&mut scene);
 
-    let mut camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,15.,20.), Vector3::new(0.,0.,15.));
+    let mut camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,5.,25.), Vector3::new(0.,5.,-5.));
     let mut camera_controller = CameraController::new(&camera);
 
     let mut renderer = Renderer::new(width, height);
@@ -100,32 +97,4 @@ fn add_test_renderables(scene: &mut Scene) {
 
     let plane = Plane::new(Vector3::new(0.,0., -5.), plane_material, Vector3::new(0., 1.,0.));
     scene.add_renderable(Box::new(plane));
-}
-
-fn trivial() -> ocl::Result<()> {
-    let src = r#"
-        __kernel void add(__global float* buffer, float scalar) {
-            buffer[get_global_id(0)] += scalar;
-        }
-    "#;
-
-    let pro_que = ProQue::builder()
-        .src(src)
-        .dims(1 << 20)
-        .build()?;
-
-    let buffer = pro_que.create_buffer::<f32>()?;
-
-    let kernel = pro_que.kernel_builder("add")
-        .arg(&buffer)
-        .arg(10.0f32)
-        .build()?;
-
-    unsafe { kernel.enq()?; }
-
-    let mut vec = vec![0.0f32; buffer.len()];
-    buffer.read(&mut vec).enq()?;
-
-    println!("The value at index [{}] is now '{}'!", 200007, vec[200007]);
-    Ok(())
 }

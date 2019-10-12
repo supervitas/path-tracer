@@ -32,12 +32,6 @@ impl <T: Float> Matrix4 <T> where T: Float + DivAssign + AddAssign {
         Matrix4::from_array(elements)
     }
 
-    pub fn translation(&mut self, x: T, y: T, z: T) {
-        self.elements[3] = x;
-        self.elements[7] = y;
-        self.elements[11] = z;
-    }
-
     pub fn from_array(elements: [T; 16]) -> Self {
         Matrix4 {
             elements
@@ -171,48 +165,31 @@ impl <T: Float> Matrix4 <T> where T: Float + DivAssign + AddAssign {
         let tx = t * x;
         let ty = t * y;
 
+        let zero = T::from(0.).unwrap();
+        let one = T::from(1.).unwrap();
+
         Matrix4::new([
-            tx * x + c, tx * y - s * z, tx * z + s * y, T::from(0.).unwrap(),
-            tx * y + s * z, ty * y + c, ty * z - s * x, T::from(0.).unwrap(),
-            tx * z - s * y, ty * z + s * x, t * z * z + c, T::from(0.).unwrap(),
-            T::from(0.).unwrap(), T::from(0.).unwrap(), T::from(0.).unwrap(), T::from(1.).unwrap()
+            tx * x + c, tx * y - s * z, tx * z + s * y, zero,
+            tx * y + s * z, ty * y + c, ty * z - s * x, zero,
+            tx * z - s * y, ty * z + s * x, t * z * z + c, zero,
+            zero, zero, zero, one
         ])
     }
 
     pub fn look_at(&mut self, position: &Vector3<T>, target: &Vector3<T>, up: &Vector3<T>)  {
-        let mut _z = position - target;
+        let mut z = position - target ;
 
-        let zero = T::from(0.).unwrap();
-        if _z.magnitude() == zero { // eye and target are in the same position
-            _z.z = T::from(1.).unwrap();
-        }
+        z.normalize();
+        let mut x = up.clone();
+        x.cross(&z);
 
-        _z.normalize();
+        x.normalize();
+        let mut  y = z.clone();
+        y.cross(&x);
 
-        let mut _x = up.clone();
-        _x.cross(&_z);
-
-        if  _x.magnitude() == zero  { // up and z are parallel
-            if T::abs(up.z) == T::from(1.).unwrap()  {
-                _z.x += T::epsilon();
-            } else {
-                _z.z += T::epsilon();
-            }
-
-            _z.normalize();
-            _x = up.clone();
-            _x.cross(&_z );
-        }
-
-        _x.normalize();
-        let mut _y = _z.clone();
-        _z.cross(&_x);
-
-        self.elements[ 0 ] = _x.x; self.elements[ 4 ] = _y.x; self.elements[ 8 ] = _z.x;
-        self.elements[ 1 ] = _x.y; self.elements[ 5 ] = _y.y; self.elements[ 9 ] = _z.y;
-        self.elements[ 2 ] = _x.z; self.elements[ 6 ] = _y.z; self.elements[ 10 ] = _z.z;
-
-//        Matrix4::from_array(elements)
+        self.elements[ 0 ] = x.x; self.elements[ 4 ] = y.x; self.elements[ 8 ] = z.x;
+        self.elements[ 1 ] = x.y; self.elements[ 5 ] = y.y; self.elements[ 9 ] = z.y;
+        self.elements[ 2 ] = x.z; self.elements[ 6 ] = y.z; self.elements[ 10 ] = z.z;
     }
 
     fn arr_to_template(arr: &[f32; 16]) -> [T; 16] {
@@ -225,17 +202,14 @@ impl <T: Float> Matrix4 <T> where T: Float + DivAssign + AddAssign {
     }
 }
 
-
 impl <T: Float> PartialEq for Matrix4<T> {
     fn eq(&self, other: &Matrix4<T>) -> bool {
-        let mut equal = true;
-
         for (i, item) in self.elements.iter().enumerate() {
             if *item != other.elements[i] as T {
-                equal = false;
+                return false
             }
         }
 
-        equal
+        true
     }
 }

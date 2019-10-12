@@ -8,6 +8,7 @@ mod tests {
     use std::ops::Mul;
     use pathtracer::math::mat4::Matrix4;
     use pathtracer::renderer::camera::Camera;
+    use pathtracer::math::spherical::Spherical;
 
     #[test]
     fn cross_product() {
@@ -45,7 +46,7 @@ mod tests {
         let mut mat = Matrix4::identity();
         mat.look_at(&origin, &target, &up);
 
-        let mut etalon = Matrix4::from_array([1., 0., 0., 0., 0., 0.9701425001453319, -0.24253562503633297, 0., 0., 0.24253562503633297, 0.9701425001453319, 0., 0., 0., 0., 1.]);
+        let etalon = Matrix4::from_array([1., 0., 0., 0., 0., 0.9701425001453319, -0.24253562503633297, 0., 0., 0.24253562503633297, 0.9701425001453319, 0., 0., 0., 0., 1.]);
         assert_eq!(mat, etalon);
     }
 
@@ -123,5 +124,13 @@ mod tests {
 
         let etalon = Color::new(1., 2., 0.6);
         assert_eq!(color, etalon);
+    }
+
+    #[test]
+    fn test_spherical() {
+        let spherical = Spherical::from_cartesian(10.,20.,30.);
+        assert_eq!(spherical.radius, 37.416573867739416);
+        assert_eq!(spherical.polar_angle, 1.0068536854342678);
+        assert_eq!(spherical.azimuth_angle, 0.3217505543966422);
     }
 }

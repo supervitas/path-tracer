@@ -5,7 +5,6 @@ use crate::math::mat4::Matrix4;
 pub struct Camera {
     pub position: Vector3<f32>,
     pub target: Vector3<f32>,
-    position_to_world: Vector3<f32>,
     up: Vector3<f32>,
     fov: f32,
     z_near: f32,
@@ -16,30 +15,24 @@ pub struct Camera {
 impl Camera {
     pub fn new(fov: f32, z_near: f32, z_far: f32, position: Vector3<f32>, target: Vector3<f32>) -> Self {
         let up = Vector3::new(0., 1.,0.);
+        let pos = &target + &position;
         let mut camera_world:Matrix4<f32> = Matrix4::identity();
-        camera_world.look_at(&position, &target, &up);
-
-        let mut position_to_world = position.clone();
-        position_to_world.apply_matrix(&camera_world);
+        camera_world.look_at(&pos, &target, &up);
 
         Camera {
             fov,
             z_far,
             z_near,
-            position,
+            position: pos,
             target,
             up,
             camera_world,
-            position_to_world
         }
     }
 
-    pub fn update_from_rotation(&mut self, rotation_x: &Matrix4<f32>, rotation_y: &Matrix4<f32>) {
-        self.camera_world.multiply(&rotation_y);
-//        self.camera_world.multiply(&rotation_x);
-
-        self.position_to_world = self.position;
-        self.position_to_world.apply_matrix(&self.camera_world);
+    pub fn update(&mut self, new_position: &Vector3<f32>) {
+        self.position = &self.target + &new_position;
+        self.camera_world.look_at(&self.position, &self.target, &self.up);
     }
 
     pub fn get_camera_ray(&self, x: u32, y: u32, width: u32, height: u32) -> Ray {
@@ -57,7 +50,7 @@ impl Camera {
         direction.normalize();
 
         Ray {
-            origin: self.position_to_world,
+            origin: self.position,
             direction
         }
     }
