@@ -1,25 +1,18 @@
 use crate::math::color::Color;
 
+#[derive(Clone, Copy, Debug)]
 pub struct Material {
-    albedo: Color,
+    pub diffuse_color: Color,
+    pub shininess: f32,
     pub opacity: f32,
-    pub roughness: f32,
-    pub metalness: f32
-
 }
 
 impl Material {
-    pub fn new(albedo: Color) -> Self {
+    pub fn new() -> Self {
         Material {
-            albedo,
+            diffuse_color: Color::new(255.,255.,255.),
             opacity: 1.,
-            roughness: 0.5,
-            metalness: 0.5,
+            shininess: 1.
         }
     }
-
-    pub fn get_albedo(&self) -> &Color {
-        &self.albedo
-    }
-
 }

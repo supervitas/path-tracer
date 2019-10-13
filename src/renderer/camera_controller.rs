@@ -38,7 +38,6 @@ impl CameraController  {
             let delta_x = x - self.last_x;
             let delta_y = y - self.last_y;
 
-
             self.spherical.azimuth_angle -= delta_x * 0.01;
             self.spherical.polar_angle = clamp(self.spherical.polar_angle - (delta_y * 0.01), 0.2,  1.4);
 

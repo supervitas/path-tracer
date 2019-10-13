@@ -24,9 +24,12 @@ pub fn load_obj(path: &str) -> Vec<Mesh> {
             mat.diffuse[2] * 255.
         );
 
-        print!("{}", diffuse_color);
 
-        let material = Material::new(diffuse_color);
+
+        let mut material = Material::new();
+        material.diffuse_color = diffuse_color;
+        material.shininess = mat.shininess;
+//        material.opacity = mat.unknown_param.get(&String::from("d")).unwrap();
 
         let mut triangles: Vec<Triangle> = Vec::new();
 

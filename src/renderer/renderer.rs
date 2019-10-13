@@ -27,12 +27,7 @@ impl Renderer {
         let material = renderable.get_material();
 
         let mut color = Color::new(0.,0.,0.);
-        let mut albedo = Color::new(0.,0.,0.);
 
-        albedo = *material.get_albedo();
-
-        let mut roughness = material.roughness;
-        let mut metalness = material.metalness;
 
         let hit_point = &ray.origin + &(ray.direction * intersection_data.distance);
         let renderable_normal = intersection_data.normal;
@@ -44,10 +39,11 @@ impl Renderer {
             let light_to_normal = f32::max(0., light_direction.dot(&renderable_normal));
 
             let diffuse = light.intensity * light_to_normal;
-            let specular = light.intensity * f32::powf(light_to_normal, 0.5) * metalness;
+            let specular = light.intensity * f32::powf(light_to_normal, material.shininess);
+//            max(pow(dot(normal, halfVector), 150.0 / intencity), 0.0) * specularColor;
 
 
-            color += albedo * (diffuse + specular);
+            color += material.diffuse_color * (diffuse + specular);
         }
 
         color

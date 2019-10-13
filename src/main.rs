@@ -28,6 +28,7 @@ pub fn main() {
     scene.add_light(light);
 
 //    scene.load_model(String::from("./assets/cornell_box/CornellBox-Sphere.obj"));
+    scene.load_model(String::from("./assets/chair.obj"));
     add_test_renderables(&mut scene);
 
     let mut camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,5.,25.), Vector3::new(0.,5.,-5.));
@@ -68,7 +69,7 @@ pub fn main() {
 
         display.show(&mut canvas, &image).unwrap();
 
-//        println!("Render time: {}", now.elapsed().as_millis());
+        println!("Render time: {}", now.elapsed().as_millis());
 
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
@@ -77,24 +78,27 @@ pub fn main() {
 fn add_test_renderables(scene: &mut Scene) {
     for i in 0..6 {
         let step = i as f32;
-        let material = Material::new(Color::new(80.,  10., 15.));
-        let sphere = Sphere::new(1.5, Vector3::new( -10. + step * 4. , 2., -10.),
-                                 material);
+        let mut material = Material::new();
+        material.diffuse_color = Color::new(80.,  10., 15.);
+        let sphere = Sphere::new(1.5, Vector3::new( -10. + step * 4. , 2., -10.), material);
         scene.add_renderable(Box::new(sphere));
     }
 
-    for i in 0..6 {
+    for i in 0..2 {
         let step = i as f32;
-        let material = Material::new(Color::new(80.,  10., 15.));
-        let sphere = Sphere::new(1.5, Vector3::new( 10. - step * 4. , 2., -2.),
+        let mut material = Material::new();
+        material.diffuse_color = Color::new(80.,  10., 15.);
+        let sphere = Sphere::new(5.5, Vector3::new( 10. - step * 15. , 15., -8.),
                                  material);
         scene.add_renderable(Box::new(sphere));
     }
 
-    let mut plane_material = Material::new(Color::new(0.,  255., 255.0));
-    plane_material.metalness = 1.;
-    plane_material.roughness = 0.;
+    let mut plane_material = Material::new();
+    plane_material.diffuse_color = Color::new(0.,  255., 255.0);
 
     let plane = Plane::new(Vector3::new(0.,0., -5.), plane_material, Vector3::new(0., 1.,0.));
     scene.add_renderable(Box::new(plane));
+
+    let plane_top = Plane::new(Vector3::new(0.,0., -125.),  Material::new(), Vector3::new(0., 0.,1.));
+    scene.add_renderable(Box::new(plane_top));
 }
