@@ -1,5 +1,4 @@
 extern crate sdl2;
-extern crate rand;
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -79,7 +78,9 @@ fn add_test_renderables(scene: &mut Scene) {
     for i in 0..6 {
         let step = i as f32;
         let mut material = Material::new();
+        material.opacity = 0.65 + 1. / i as f32;
         material.diffuse_color = Color::new(80.,  10., 15.);
+
         let sphere = Sphere::new(1.5, Vector3::new( -10. + step * 4. , 2., -10.), material);
         scene.add_renderable(Box::new(sphere));
     }
@@ -87,18 +88,42 @@ fn add_test_renderables(scene: &mut Scene) {
     for i in 0..2 {
         let step = i as f32;
         let mut material = Material::new();
+        material.opacity = 0.95;
         material.diffuse_color = Color::new(80.,  10., 15.);
-        let sphere = Sphere::new(5.5, Vector3::new( 10. - step * 15. , 15., -8.),
-                                 material);
+        let sphere = Sphere::new(5.5, Vector3::new( 10. - step * 15. , 15., -8.), material);
         scene.add_renderable(Box::new(sphere));
     }
 
-    let mut plane_material = Material::new();
-    plane_material.diffuse_color = Color::new(0.,  255., 255.0);
+    {
+        let mut plane_material = Material::new();
+        plane_material.diffuse_color = Color::new(100., 100., 100.0);
 
-    let plane = Plane::new(Vector3::new(0.,0., -5.), plane_material, Vector3::new(0., 1.,0.));
-    scene.add_renderable(Box::new(plane));
+        let plane_floor = Plane::new(Vector3::new(0., 0., 0.), plane_material, Vector3::new(0., 1., 0.));
+        scene.add_renderable(Box::new(plane_floor));
+    }
 
-    let plane_top = Plane::new(Vector3::new(0.,0., -125.),  Material::new(), Vector3::new(0., 0.,1.));
-    scene.add_renderable(Box::new(plane_top));
+
+    {
+        let mut plane_material = Material::new();
+        plane_material.diffuse_color = Color::new(10.,  160., 10.);
+
+        let plane_top = Plane::new(Vector3::new(0.,0., -50.),  plane_material, Vector3::new(0., 0.,1.));
+        scene.add_renderable(Box::new(plane_top));
+    }
+
+    {
+        let mut plane_material = Material::new();
+        plane_material.diffuse_color = Color::new(120.,  0., 10.);
+
+        let plane_behind = Plane::new(Vector3::new(0.,0., 50.),  plane_material, Vector3::new(0., 0.,-1.));
+        scene.add_renderable(Box::new(plane_behind));
+    }
+
+    {
+        let mut plane_material = Material::new();
+        plane_material.diffuse_color = Color::new(10.,  10., 110.);
+
+        let plane_left = Plane::new(Vector3::new(50., 0., 0.), plane_material, Vector3::new(-1., 0., 0.));
+        scene.add_renderable(Box::new(plane_left));
+    }
 }

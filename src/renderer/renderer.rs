@@ -2,13 +2,20 @@ use crate::math::vec3::Vector3;
 use crate::renderables::renderable::{Renderable, IntersectionData};
 use crate::renderer::scene::Scene;
 use crate::renderer::camera::Camera;
+use crate::renderer::thread_pool::ThreadPool;
 use crate::math::ray::Ray;
 use crate::renderer::light::Light;
 use crate::math::color::Color;
+use rand::distributions::{Uniform, Distribution};
+use std::f32::consts::PI;
+
+const RAY_COUNT: usize = 16;
 
 pub struct Renderer {
     width: u32,
     height: u32,
+    last_frame_camera_position: Vector3<f32>,
+    thread_pool: ThreadPool,
     image: Vec<u8>
 }
 
@@ -19,9 +26,20 @@ impl Renderer {
         Renderer {
             width,
             height,
+            thread_pool: ThreadPool::new(),
+            last_frame_camera_position: Vector3::new(0.,0.,0.),
             image
         }
     }
+
+//    fn create_scatter_direction(normal: &Vector3<f32>) -> (Vector3<f32>, f32) {
+//        let range = Uniform::new(0.0, PI);
+//        let mut rng = rand::thread_rng();
+//        let r1 = range.sample(&mut rng);
+//        let r2 = range.sample(&mut rng);
+//
+//    }
+
 
     fn calculate_light(&self, ray: &Ray, intersection_data: IntersectionData, renderable: &Box<dyn Renderable>, lights: &Vec<Light>) -> Color {
         let material = renderable.get_material();
@@ -81,6 +99,11 @@ impl Renderer {
     }
 
     pub fn render(&mut self, scene: &Scene, camera: &Camera) -> &Vec<u8> {
+        if self.last_frame_camera_position != camera.position { // clear buffer when camera moved;
+            self.last_frame_camera_position = camera.position;
+            for i in 0..self.image.len() { self.image[i] = 0; }
+        }
+
         for h in 0..self.height {
             for w in 0..self.width {
                 let offset = (h * self.width * 3 + w * 3) as usize;
