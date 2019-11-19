@@ -22,12 +22,15 @@ impl <T: Float> Matrix4 <T> where T: Float + DivAssign + AddAssign {
     }
 
     pub fn identity() -> Self {
-        let elements = Matrix4::arr_to_template(&[
-            1.0, 0.0, 0.0, 0.0,
-            0.0, 1.0, 0.0, 0.0,
-            0.0, 0.0, 1.0, 0.0,
-            0.0, 0.0, 0.0, 1.0
-        ]);
+        let zero = T::zero();
+        let one = T::one();
+
+        let elements = [
+            one, zero, zero, zero,
+            zero, one, zero, zero,
+            zero, zero, one, zero,
+            zero, zero, zero, one
+        ];
 
         Matrix4::from_array(elements)
     }
@@ -89,7 +92,7 @@ impl <T: Float> Matrix4 <T> where T: Float + DivAssign + AddAssign {
 
         let det = n11 * t11 + n21 * t12 + n31 * t13 + n41 * t14;
 
-        if det == T::from(0.).unwrap()  {
+        if det == T::zero()  {
             println!("can't invert matrix, determinant is 0, return identity");
             self.elements =  Matrix4::identity().elements;
             return;
@@ -118,40 +121,49 @@ impl <T: Float> Matrix4 <T> where T: Float + DivAssign + AddAssign {
         me[ 15 ] = ( n12 * n23 * n31 - n13 * n22 * n31 + n13 * n21 * n32 - n11 * n23 * n32 - n12 * n21 * n33 + n11 * n22 * n33 ) * det_inv;
     }
 
-    pub fn rotate_y(&mut self, theta: f32) {
-        let c = f32::cos( theta );
-        let s = f32::sin( theta );
+    pub fn rotate_y(&mut self, theta: T) {
+        let c = T::cos( theta );
+        let s = T::sin( theta );
 
-        self.set(Matrix4::arr_to_template(&[
-            c, 0., s, 0.,
-            0., 1., 0., 0.,
-            - s, 0., c, 0.,
-            0., 0., 0., 1.
-        ]));
+        let zero = T::zero();
+        let one = T::one();
+
+        self.set([
+            c, zero, s, zero,
+            zero, one, zero, zero,
+            -s, zero, c, zero,
+            zero, zero, zero, one
+        ]);
     }
 
-    pub fn rotate_z(&mut self, theta: f32) {
-        let c = f32::cos(theta);
-        let s = f32::sin(theta);
+    pub fn rotate_z(&mut self, theta: T) {
+        let c = T::cos(theta);
+        let s = T::sin(theta);
 
-        self.set(Matrix4::arr_to_template(&[
-            c, -s, 0., 0.,
-            s, c, 0., 0.,
-            0., 0., 1., 0.,
-            0., 0., 0., 1.
-        ]));
+        let zero = T::zero();
+        let one = T::one();
+
+        self.set([
+            c, -s, zero, zero,
+            s, c, zero, zero,
+            zero, zero, one, zero,
+            zero, zero, zero, one
+        ]);
     }
 
-    pub fn rotate_x(&mut self, theta: f32) {
-        let c = f32::cos( theta );
-        let s = f32::sin( theta );
+    pub fn rotate_x(&mut self, theta: T) {
+        let c = T::cos(theta);
+        let s = T::sin(theta);
 
-        self.set(Matrix4::arr_to_template(&[
-            1., 0., 0., 0.,
-            0., c, - s, 0.,
-            0., s, c, 0.,
-            0., 0., 0., 1.
-        ]));
+        let zero = T::zero();
+        let one = T::one();
+
+        self.set([
+            one, zero, zero, zero,
+            zero, c, -s, zero,
+            zero, s, c, zero,
+            zero, zero, zero, one
+        ]);
     }
 
     pub fn from_axis_angle(axis: &Vector3<T>, angle: T) -> Self {
@@ -190,15 +202,6 @@ impl <T: Float> Matrix4 <T> where T: Float + DivAssign + AddAssign {
         self.elements[ 0 ] = x.x; self.elements[ 4 ] = y.x; self.elements[ 8 ] = z.x;
         self.elements[ 1 ] = x.y; self.elements[ 5 ] = y.y; self.elements[ 9 ] = z.y;
         self.elements[ 2 ] = x.z; self.elements[ 6 ] = y.z; self.elements[ 10 ] = z.z;
-    }
-
-    fn arr_to_template(arr: &[f32; 16]) -> [T; 16] {
-        <_>::try_from(
-            &*arr
-                .into_iter()
-                .map(|it| T::from(it.clone()).unwrap())
-                .collect::<Vec<_>>()
-        ).unwrap()
     }
 }
 

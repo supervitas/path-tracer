@@ -104,17 +104,32 @@ impl Renderer {
             for i in 0..self.image.len() { self.image[i] = 0; }
         }
 
-        for h in 0..self.height {
-            for w in 0..self.width {
-                let offset = (h * self.width * 3 + w * 3) as usize;
-                let camera_ray = camera.get_camera_ray(w, h, self.width, self.height);
-                let color = self.check_intersections(camera_ray, scene).as_u8();
+        let workers_num = self.thread_pool.get_workers_num() as u32;
+        let height_per_thread = self.height / workers_num;
 
-                self.image[offset] = color[0];
-                self.image[offset + 1] = color[1];
-                self.image[offset + 2] = color[2];
-            }
+        for i in 0..workers_num {
+            let start_height = height_per_thread * i;
+            let end_height = start_height + height_per_thread;
+
+            let mut task = || {
+                for h in start_height..end_height {
+                    for w in 0..self.width {
+                        let offset = (h * self.width * 3 + w * 3) as usize;
+                        let camera_ray = camera.get_camera_ray(w, h, self.width, self.height);
+                        let color = self.check_intersections(camera_ray, scene).as_u8();
+
+                        self.image[offset] = color[0];
+                        self.image[offset + 1] = color[1];
+                        self.image[offset + 2] = color[2];
+                    }
+                }
+            };
+
+            task()
+//            self.thread_pool.add_task(Box::new(task));
         }
+
+        self.thread_pool.wait_all();
 
         return &self.image;
     }
