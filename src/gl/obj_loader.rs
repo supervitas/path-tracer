@@ -14,7 +14,7 @@ pub fn load_obj(path: &str) -> Vec<Mesh> {
     let (models, materials) = model.unwrap();
     let mut meshes: Vec<Mesh> = Vec::new();
 
-    for (i, m) in models.iter().enumerate() {
+    for (_i, m) in models.iter().enumerate() {
         let mesh = &m.mesh;
 
         let mat = &materials[mesh.material_id.unwrap()];

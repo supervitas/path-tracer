@@ -1,6 +1,7 @@
 use crate::math::vec3::Vector3;
 use crate::math::color::Color;
 
+#[derive(Clone, Debug)]
 pub struct Light {
     pub color: Color,
     pub intensity: f32,

@@ -1,6 +1,5 @@
 use crate::renderables::renderable::{Renderable, IntersectionData};
 use crate::math::ray::Ray;
-use crate::math::vec3::Vector3;
 use crate::renderables::material::Material;
 use crate::renderables::triangle::Triangle;
 use crate::math::bbox::BBox;

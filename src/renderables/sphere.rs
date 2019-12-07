@@ -47,7 +47,7 @@ impl Renderable for Sphere {
         let first_intersection_distance = projection_length - from_center_to_sphere_end;
         let second_intersection_distance = projection_length + from_center_to_sphere_end;
 
-        let mut distance;
+        let distance;
         if first_intersection_distance < second_intersection_distance {
            distance = first_intersection_distance;
         } else {

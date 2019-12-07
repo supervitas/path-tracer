@@ -6,7 +6,7 @@ use crate::gl::obj_loader::load_obj;
 pub struct Scene {
     background: Color,
     lights: Vec<Light>,
-    renderables: Vec<Box<dyn Renderable>>
+    renderables: Vec<Box<dyn Renderable + Send + 'static>>
 }
 
 impl Scene {
@@ -18,7 +18,7 @@ impl Scene {
       }
     }
 
-    pub fn get_renderables(&self) -> &Vec<Box<dyn Renderable>> {
+    pub fn get_renderables(&self) -> &Vec<Box<dyn Renderable + Send + 'static >> {
         &self.renderables
     }
 
@@ -32,7 +32,7 @@ impl Scene {
         &self.background
     }
 
-    pub fn add_renderable(&mut self, renderable: Box<dyn Renderable>) {
+    pub fn add_renderable(&mut self, renderable: Box<dyn Renderable + Send + 'static>) {
         self.renderables.push(renderable);
     }
 

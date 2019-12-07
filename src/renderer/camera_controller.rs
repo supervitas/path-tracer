@@ -1,9 +1,6 @@
 use crate::renderer::camera::Camera;
 use sdl2::mouse::MouseButton;
 use sdl2::EventPump;
-use std::f32::consts::PI;
-use crate::math::mat4::Matrix4;
-use crate::math::vec3::Vector3;
 use crate::math::spherical::Spherical;
 use num::clamp;
 

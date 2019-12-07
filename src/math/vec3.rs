@@ -1,6 +1,6 @@
 use std::fmt;
 use std::ops::{Mul, Add, DivAssign,  Neg};
-use num::{Float, clamp};
+use num::{Float};
 use core::ops;
 use crate::math::mat4::Matrix4;
 
@@ -11,7 +11,7 @@ pub struct Vector3 <T: Float> {
     pub z: T
 }
 
-impl <T: Float> Vector3 <T> where T: Float + DivAssign {
+impl <T: Float> Vector3 <T> where T: Float + DivAssign + Copy {
     pub fn new(x: T, y: T, z: T) -> Self {
         Vector3 {x, y, z}
     }
@@ -22,12 +22,6 @@ impl <T: Float> Vector3 <T> where T: Float + DivAssign {
         self.z = z;
 
         self
-    }
-
-    pub fn copy(&mut self, v2: &Vector3<T>) {
-        self.x = v2.x;
-        self.y = v2.y;
-        self.z = v2.z;
     }
 
     pub fn cross(&mut self, v2: &Vector3<T>) -> &mut Self {

@@ -1,8 +1,6 @@
-use std::ops::{Mul, Add, DivAssign, Neg, AddAssign};
-use num::{Float, NumCast};
-use core::ops;
+use std::ops::{DivAssign, AddAssign};
+use num::{Float};
 use crate::math::vec3::Vector3;
-use std::convert::TryFrom;
 
 #[derive(Clone, Copy, Debug)]
 pub struct Matrix4 <T: Float> {

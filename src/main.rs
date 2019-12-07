@@ -17,23 +17,24 @@ use pathtracer::renderables::plane::Plane;
 use pathtracer::math::color::Color;
 
 use pathtracer::renderer::camera_controller::CameraController;
+use std::sync::Arc;
 
 pub fn main() {
     let width = 800;
     let height = 600;
 
     let mut scene = Scene::new(Color::new(0., 233., 255.));
-    let light = Light::new(Color::new(255., 255., 255.), 1.2, Vector3::new(2., 20., 10.));
+    let light = Light::new(Color::new(255., 255., 255.), 1.2, Vector3::new(2., 150., 1.));
     scene.add_light(light);
 
 //    scene.load_model(String::from("./assets/cornell_box/CornellBox-Sphere.obj"));
     scene.load_model(String::from("./assets/chair.obj"));
     add_test_renderables(&mut scene);
 
-    let mut camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,5.,25.), Vector3::new(0.,5.,-5.));
+    let camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,5.,25.), Vector3::new(0.,5.,-5.));
     let mut camera_controller = CameraController::new(&camera);
 
-    let mut renderer = Renderer::new(width, height);
+    let mut renderer = Renderer::new(width, height, camera, scene);
 
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
@@ -63,8 +64,8 @@ pub fn main() {
             }
         }
 
-        camera_controller.update(&mut camera, &event_pump);
-        let image = renderer.render(&scene, &camera);
+        camera_controller.update( Arc::get_mut(&mut renderer.camera).unwrap(), &event_pump);
+        let image = renderer.render();
 
         display.show(&mut canvas, &image).unwrap();
 

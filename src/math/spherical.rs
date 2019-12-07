@@ -1,7 +1,6 @@
 use std::fmt;
-use std::ops::{Mul, Add, DivAssign,  Neg};
-use num::{Float, clamp};
-use core::ops;
+use std::ops::{Mul, Add, DivAssign};
+use num::{Float};
 use crate::math::mat4::Matrix4;
 use crate::math::vec3::Vector3;
 
