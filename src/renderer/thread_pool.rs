@@ -7,29 +7,35 @@ use std::sync::atomic::{AtomicBool, Ordering, AtomicUsize};
 use std::thread::yield_now;
 use std::collections::VecDeque;
 
+struct ThreadPoolData {
+    task_count: AtomicUsize,
+    stop: AtomicBool,
+    cond_mutex_pair: (Mutex<VecDeque<Box<dyn FnOnce() + Send + 'static>>>, Condvar)
+}
 
 pub struct ThreadPool {
     threads: usize,
-    task_count: Arc<AtomicUsize>,
-    stop: Arc<AtomicBool>,
     workers: Vec<thread::JoinHandle<()>>,
-    cond_mutex_pair: Arc<(Mutex<VecDeque<Box<dyn FnOnce() + Send + 'static>>>, Condvar)>
+    thread_pool_data: Arc<ThreadPoolData>
 }
 
 impl ThreadPool {
     pub fn new() -> Self {
         let threads = num_cpus::get();
         let workers = Vec::with_capacity(threads);
-        let stop = Arc::new(AtomicBool::from(false));
-        let cond_mutex_pair = Arc::new((Mutex::new(VecDeque::new()), Condvar::new()));
-        let task_count = Arc::new(AtomicUsize::new(0));
+
+        let thread_pool_data = Arc::new(
+            ThreadPoolData {
+                stop: AtomicBool::from(false),
+                cond_mutex_pair: (Mutex::new(VecDeque::new()), Condvar::new()),
+                task_count: AtomicUsize::new(0)
+            }
+        );
 
         let mut thread_pool = ThreadPool {
             threads,
             workers,
-            stop,
-            cond_mutex_pair,
-            task_count
+            thread_pool_data
         };
 
         thread_pool.create_workers();
@@ -41,16 +47,14 @@ impl ThreadPool {
         return self.threads;
     }
 
-    pub fn create_workers(&mut self) {
+    fn create_workers(&mut self) {
         for _i in 0..self.threads {
-            let stop_ref = Arc::clone(&self.stop);
-            let pair = self.cond_mutex_pair.clone();
-            let task_count = self.task_count.clone();
+            let thread_pool_data = Arc::clone(&self.thread_pool_data);
 
             let worker = thread::spawn(move || loop {
                 let task;
                 {
-                    let (lock, cvar) = &*pair;
+                    let (lock, cvar) = &thread_pool_data.cond_mutex_pair;
                     let mut started = lock.lock().unwrap();
 
                     while (*started).len() == 0 {
@@ -59,14 +63,13 @@ impl ThreadPool {
 
                     task = started.pop_front().unwrap();
 
-                    if stop_ref.load(Ordering::Relaxed)  {
-                        println!("STOP");
+                    if thread_pool_data.stop.load(Ordering::Relaxed)  {
                         return;
                     }
                 }
                 task();
 
-                task_count.fetch_sub(1, Ordering::Release);
+                thread_pool_data.task_count.fetch_sub(1, Ordering::Release);
             });
 
             self.workers.push( worker);
@@ -74,23 +77,23 @@ impl ThreadPool {
     }
 
     pub fn add_task(&mut self, task: Box<dyn FnOnce() + Send + 'static>) {
-        let (lock, cvar) = &*self.cond_mutex_pair;
+        let (lock, cvar) = &self.thread_pool_data.cond_mutex_pair;
         {
             (*lock.lock().unwrap()).push_back(task);
         }
-        self.task_count.fetch_add(1, Ordering::Release);
+        self.thread_pool_data.task_count.fetch_add(1, Ordering::Release);
         cvar.notify_one();
     }
 
     pub fn wait_all(&self) {
-        while self.task_count.load(Ordering::Relaxed) != 0 {
+        while self.thread_pool_data.task_count.load(Ordering::Relaxed) != 0 {
             yield_now();
         }
     }
 
     pub fn destroy(&self) {
-        self.stop.store(true, Ordering::Release);
-        let (_, cvar) = &*self.cond_mutex_pair;
+        self.thread_pool_data.stop.store(true, Ordering::Release);
+        let (_, cvar) = &self.thread_pool_data.cond_mutex_pair;
         cvar.notify_all();
     }
 }

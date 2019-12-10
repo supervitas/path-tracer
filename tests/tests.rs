@@ -1,4 +1,3 @@
-
 #[cfg(test)]
 mod tests {
     use pathtracer::math::vec3::Vector3;
@@ -102,19 +101,8 @@ mod tests {
         mat.inverse();
 
         let el =  [1., 0., 0., 0., 0., 0.9701425001453319, 0.24253562503633297, 0., 0., -0.24253562503633297, 0.9701425001453319, 0., 0., 0., 0., 1.];
-        let etalon: Matrix4<f64> = Matrix4::from_array(el);
+        let etalon = Matrix4::from_array(el);
         assert_eq!(mat, etalon);
-    }
-
-    #[test]
-    fn camera_get_ray() {
-        let w = 800;
-        let h = 600;
-        let camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,5.,20.), Vector3::new(0.,0.,0.));
-
-        let ray = camera.get_camera_ray(400, 600, w, h);
-
-        print!("{}", ray.direction);
     }
 
     #[test]

@@ -64,7 +64,7 @@ pub fn main() {
             }
         }
 
-        camera_controller.update( Arc::get_mut(&mut renderer.camera).unwrap(), &event_pump);
+        camera_controller.update( renderer.get_render_camera(), &event_pump);
         let image = renderer.render();
 
         display.show(&mut canvas, &image).unwrap();

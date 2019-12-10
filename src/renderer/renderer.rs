@@ -11,14 +11,18 @@ use std::sync::Arc;
 
 const RAY_COUNT: usize = 16;
 
+struct RenderScene {
+    camera: Camera,
+    scene: Scene,
+    image: Vec<u8>
+}
+
 pub struct Renderer {
     width: u32,
     height: u32,
     last_frame_camera_position: Vector3<f32>,
     thread_pool: ThreadPool,
-    image: Arc<Vec<u8>>,
-    pub camera: Arc<Camera>,
-    pub scene: Arc<Scene>,
+    render_scene: Arc<RenderScene>
 }
 
 impl Renderer {
@@ -30,9 +34,7 @@ impl Renderer {
             height,
             thread_pool: ThreadPool::new(),
             last_frame_camera_position: Vector3::new(0.,0.,0.),
-            image: Arc::new(image),
-            camera: Arc::new(camera),
-            scene: Arc::new(scene)
+            render_scene: Arc::new(RenderScene { image, scene, camera })
         }
     }
 
@@ -44,6 +46,8 @@ impl Renderer {
 //
 //    }
 
+
+    pub fn get_render_camera(&mut self) -> &mut Camera {&mut Arc::get_mut(&mut self.render_scene).unwrap().camera}
 
     fn calculate_direct_light(ray: &Ray, scene: &Scene, intersection_data: IntersectionData, renderable: &Box<dyn Renderable + Send + 'static>) -> Color {
         let material = renderable.get_material();
@@ -58,19 +62,18 @@ impl Renderer {
             light_direction.normalize();
 
 
-
-//            let dotResult = ray.direction.dot(&renderable_normal);
 //
-//            let shadowPoint;
-//            if dotResult < 0.0 {
-//                shadowPoint = &hit_point + &renderable_normal.mul(0.001);
+//            let dot_result = ray.direction.dot(&renderable_normal);
+//            let shadow_point;
+//            if dot_result < 0.0 {
+//                shadow_point = &hit_point + &renderable_normal;
 //            } else {
-//                shadowPoint = &hit_point - &renderable_normal.mul(0.001);
+//                shadow_point = &hit_point - &renderable_normal;
 //            }
-
-//            let shadow_ray = Ray::new(shadowPoint, light_direction);
-
-//            let in_shadow = match self.check_intersections(&shadow_ray, &scene) {
+//
+//            let shadow_ray = Ray::new(shadow_point, light_direction);
+//
+//            let in_shadow = match Renderer::check_intersections(&shadow_ray, &scene) {
 //                Some(data) => { 0.},
 //                None => {1.}
 //            };
@@ -127,11 +130,11 @@ impl Renderer {
     }
 
     pub fn render(&mut self) -> &Vec<u8> {
-        let image = Arc::get_mut(&mut self.image).unwrap();
+        let render_scene = Arc::get_mut(&mut self.render_scene).unwrap();
 
-        if self.last_frame_camera_position != self.camera.position { // clear buffer when camera moved;
-            self.last_frame_camera_position = self.camera.position;
-            for i in 0..image.len() { image[i] = 0; }
+        if self.last_frame_camera_position != render_scene.camera.position { // clear buffer when camera moved;
+            self.last_frame_camera_position = render_scene.camera.position;
+            for i in 0..render_scene.image.len() { render_scene.image[i] = 0; }
         }
 
         let workers_num = self.thread_pool.get_workers_num() as u32;
@@ -141,23 +144,22 @@ impl Renderer {
             let start_height = height_per_thread * i;
             let end_height = start_height + height_per_thread;
 
+
             let width = self.width.clone();
             let height = self.height.clone();
-            let camera = self.camera.clone();
-            let mut image = self.image.clone();
-            let scene = self.scene.clone();
+            let mut render_scene_thread = Arc::clone(&self.render_scene);
 
             let task = move || {
                 for h in start_height..end_height {
                     for w in 0..width {
                         let offset = (h * width * 3 + w * 3) as usize;
-                        let camera_ray = camera.get_camera_ray(w, h, width, height);
-                        let color = Renderer::trace(camera_ray, &scene).as_u8();
+                        let camera_ray = render_scene_thread.camera.get_camera_ray(w, h, width, height);
+                        let color = Renderer::trace(camera_ray, &render_scene_thread.scene).as_u8();
 
                         unsafe {
-                            Arc::get_mut_unchecked(&mut image)[offset] = color[0];
-                            Arc::get_mut_unchecked(&mut image)[offset + 1] = color[1];
-                            Arc::get_mut_unchecked(&mut image)[offset + 2] = color[2];
+                            Arc::get_mut_unchecked(&mut render_scene_thread).image[offset] = color[0];
+                            Arc::get_mut_unchecked(&mut render_scene_thread).image[offset + 1] = color[1];
+                            Arc::get_mut_unchecked(&mut render_scene_thread).image[offset + 2] = color[2];
                         }
                     }
                 }
@@ -168,6 +170,6 @@ impl Renderer {
 
         self.thread_pool.wait_all();
 
-        return &self.image;
+        return &self.render_scene.image;
     }
 }
