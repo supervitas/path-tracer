@@ -80,6 +80,21 @@ mod tests {
     }
 
     #[test]
+    fn math_vec() {
+        let a = Vector3::new(1.,1.,1.);
+        let b = Vector3::new(2.,3.,4.);
+
+        let add_result = &a + &b;
+        let neg_result = &a - &b;
+
+        let mul = &a + &(b * 2.);
+
+        assert_eq!(add_result, Vector3::new(3., 4., 5.));
+        assert_eq!(neg_result, Vector3::new(-1., -2., -3.));
+        assert_eq!(mul, Vector3::new(5., 7., 9.));
+    }
+
+    #[test]
     fn vector_apply_matrix() {
         let mut v1 = Vector3::new(1.,1., 1.);
         let m1 = Matrix4::new([1.,2.,3.,4.,5.,6.,7.,8.,9.,10.,11.,12.,13.,14.,15.,16.]);

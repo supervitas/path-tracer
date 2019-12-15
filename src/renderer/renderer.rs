@@ -50,39 +50,34 @@ impl Renderer {
     pub fn get_render_camera(&mut self) -> &mut Camera {&mut Arc::get_mut(&mut self.render_scene).unwrap().camera}
 
     fn calculate_direct_light(ray: &Ray, scene: &Scene, intersection_data: IntersectionData, renderable: &Box<dyn Renderable + Send + 'static>) -> Color {
-        let material = renderable.get_material();
-
         let mut color = Color::new(0.,0.,0.);
 
         let hit_point = &ray.origin + &(ray.direction * intersection_data.distance);
         let renderable_normal = intersection_data.normal;
+        let material = renderable.get_material();
+
+
+        let shadow_point;
+        if ray.direction.dot(&renderable_normal) < 0.0 {
+            shadow_point = &hit_point + &(renderable_normal * 0.0001);
+        } else {
+            shadow_point = &hit_point - &(renderable_normal * 0.001);
+        }
 
         for light in scene.get_lights() {
             let mut light_direction = &light.position - &hit_point;
             light_direction.normalize();
 
+            let shadow_ray = Ray::new(shadow_point, light_direction,);
 
-//
-//            let dot_result = ray.direction.dot(&renderable_normal);
-//            let shadow_point;
-//            if dot_result < 0.0 {
-//                shadow_point = &hit_point + &renderable_normal;
-//            } else {
-//                shadow_point = &hit_point - &renderable_normal;
-//            }
-//
-//            let shadow_ray = Ray::new(shadow_point, light_direction);
-//
-//            let in_shadow = match Renderer::check_intersections(&shadow_ray, &scene) {
-//                Some(data) => { 0.},
-//                None => {1.}
-//            };
-
-            let in_shadow = 1.0;
+            let in_light = match Renderer::check_intersections(&shadow_ray, &scene) {
+                Some(_) => { 0. },
+                None => {1.}
+            };
 
             let light_to_normal = f32::max(0., light_direction.dot(&renderable_normal));
 
-            let diffuse = in_shadow * light.intensity * light_to_normal;
+            let diffuse = in_light * light.intensity * light_to_normal;
 
             color += material.diffuse_color * diffuse;
         }
@@ -143,7 +138,6 @@ impl Renderer {
         for i in 0..workers_num {
             let start_height = height_per_thread * i;
             let end_height = start_height + height_per_thread;
-
 
             let width = self.width.clone();
             let height = self.height.clone();

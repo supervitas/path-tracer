@@ -105,26 +105,26 @@ fn add_test_renderables(scene: &mut Scene) {
 
 
     {
-        let mut plane_material = Material::new();
-        plane_material.diffuse_color = Color::new(10.,  160., 10.);
-
-        let plane_top = Plane::new(Vector3::new(0.,0., -50.),  plane_material, Vector3::new(0., 0.,1.));
-        scene.add_renderable(Box::new(plane_top));
+//        let mut plane_material = Material::new();
+//        plane_material.diffuse_color = Color::new(10.,  160., 10.);
+//
+//        let plane_top = Plane::new(Vector3::new(0.,0., -50.),  plane_material, Vector3::new(0., 0.,1.));
+//        scene.add_renderable(Box::new(plane_top));
     }
 
     {
-        let mut plane_material = Material::new();
-        plane_material.diffuse_color = Color::new(120.,  0., 10.);
-
-        let plane_behind = Plane::new(Vector3::new(0.,0., 50.),  plane_material, Vector3::new(0., 0.,-1.));
-        scene.add_renderable(Box::new(plane_behind));
+//        let mut plane_material = Material::new();
+//        plane_material.diffuse_color = Color::new(120.,  0., 10.);
+//
+//        let plane_behind = Plane::new(Vector3::new(0.,0., 50.),  plane_material, Vector3::new(0., 0.,-1.));
+//        scene.add_renderable(Box::new(plane_behind));
     }
 
     {
-        let mut plane_material = Material::new();
-        plane_material.diffuse_color = Color::new(10.,  10., 110.);
-
-        let plane_left = Plane::new(Vector3::new(50., 0., 0.), plane_material, Vector3::new(-1., 0., 0.));
-        scene.add_renderable(Box::new(plane_left));
+//        let mut plane_material = Material::new();
+//        plane_material.diffuse_color = Color::new(10.,  10., 110.);
+//
+//        let plane_left = Plane::new(Vector3::new(50., 0., 0.), plane_material, Vector3::new(-1., 0., 0.));
+//        scene.add_renderable(Box::new(plane_left));
     }
 }

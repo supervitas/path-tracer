@@ -7,7 +7,7 @@ pub struct IntersectionData {
     pub normal: Vector3<f32>,
 }
 
-pub trait Renderable : Sync{
+pub trait Renderable : Sync {
     fn intersects(&self, ray: &Ray) -> Option<IntersectionData>;
     fn get_material(&self) -> &Material;
 }
