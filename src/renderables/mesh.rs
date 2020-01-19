@@ -45,16 +45,14 @@ impl Renderable for Mesh {
             };
         }
 
-        match intersected_triangle {
-             Some(triangle) => {
-                 return Some(IntersectionData {
-                     distance: min_distance,
-                     normal: triangle.get_normal()
-                 })
-             }
-            _ => {
-                return None;
+        return match intersected_triangle {
+            Some(triangle) => {
+                Some(IntersectionData {
+                    distance: min_distance,
+                    normal: triangle.get_normal()
+                })
             }
+            _ => None
         }
     }
 

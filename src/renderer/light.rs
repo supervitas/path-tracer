@@ -13,7 +13,7 @@ impl Light {
         Light {
             color,
             intensity,
-            position,
+            position
         }
     }
 }

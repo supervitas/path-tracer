@@ -10,6 +10,8 @@ pub struct Triangle {
     normal: Vector3<f32>,
 }
 
+const EPSILON: f32 = 0.00001;
+
 impl Triangle {
     pub fn new(v0: Vector3<f32>, v1: Vector3<f32>, v2: Vector3<f32>) -> Self {
         let edge1 = &v1.clone() - &v0;
@@ -39,31 +41,39 @@ impl Triangle {
         self.normal.clone()
     }
 
+
     pub fn intersects(&self, ray: &Ray) -> Option<f32> {
         let mut pvec = ray.direction.clone();
-        pvec.cross(&self.edge2);
 
-        let det = self.edge1.dot(&pvec);
-        if det < std::f32::EPSILON && det > -std::f32::EPSILON {
+        let h = pvec.cross(&self.edge2);
+        let a = self.edge1.dot(h);
+
+        if f32::abs(a) < EPSILON {
             return None;
         }
 
-        let inv_det = 1.0 / det;
-        let tvec = &ray.origin - &self.v0;
+        let f = 1.0 / a;
+        let s = &ray.origin - &(self.v0);
+        let u = f * (s.dot(h));
 
-        let u = tvec.dot(&pvec) * inv_det;
-        if u < 0. || u > 1. {
+        if u < 0.0 || u > 1.0 {
             return None;
         }
 
-        let mut qvec = tvec.clone();
-        qvec.cross(&self.edge1);
+        let mut st = s.clone();
+        let q = st.cross(&self.edge1);
+        let v = f * ray.direction.dot(q);
 
-        let v = ray.direction.dot(&qvec) * inv_det;
-        if v < 0. || u + v > 1. {
+        if v < 0.0 || u + v > 1.0 {
             return None;
         }
 
-        Some(self.edge2.dot(&qvec) * inv_det)
+        let t = f * self.edge2.dot(q);
+
+        if t > EPSILON {
+            return Some(t);
+        }
+
+        return None;
     }
 }

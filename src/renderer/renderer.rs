@@ -9,19 +9,23 @@ use crate::math::color::Color;
 use rand::distributions::{Uniform, Distribution};
 use std::sync::Arc;
 use std::f32::consts::PI;
+use crate::math::lerp;
+use rand::prelude::ThreadRng;
 
-const MAX_DEPTH: usize = 1;
-const INDIRECT_RAYS: usize = 16;
+const MAX_DEPTH: usize = 2;
+const INDIRECT_RAYS: usize = 64;
+
 
 struct RenderScene {
     camera: Camera,
     scene: Scene,
-    image: Vec<u8>
+    image: Vec<f32>
 }
 
 pub struct Renderer {
     width: u32,
     height: u32,
+    frames_total: u32,
     last_frame_camera_position: Vector3<f32>,
     thread_pool: ThreadPool,
     render_scene: Arc<RenderScene>
@@ -29,11 +33,14 @@ pub struct Renderer {
 
 impl Renderer {
     pub fn new(width: u32, height: u32, camera: Camera, scene: Scene) -> Self {
-        let image: Vec<u8> = vec![0; ((width * height) * 3) as usize];
+        let image: Vec<f32> = vec![0.; ((width * height) * 3) as usize];
+        let range = Uniform::new(0.0, 1.0);
+        let mut rng: ThreadRng = rand::thread_rng();
 
         Renderer {
             width,
             height,
+            frames_total: 0,
             thread_pool: ThreadPool::new(),
             last_frame_camera_position: Vector3::new(0.,0.,0.),
             render_scene: Arc::new(RenderScene { image, scene, camera })
@@ -42,62 +49,97 @@ impl Renderer {
 
     pub fn get_render_camera(&mut self) -> &mut Camera {&mut Arc::get_mut(&mut self.render_scene).unwrap().camera}
 
-    fn calculate_indirect_light(ray: &Ray, scene: &Scene, intersection_data: IntersectionData, renderable: &Box<dyn Renderable + Send + 'static>) -> Color {
+    fn create_scatter_direction(normal: &Vector3<f32>, r1: f32, r2: f32) -> (Vector3<f32>, f32) {
+        let y = r1;
+        let azimuth = r2 * 2.0 * PI;
+        let sin_elevation = f32::sqrt(1.0 - y * y);
+        let x = sin_elevation * f32::cos(azimuth);
+        let z = sin_elevation * f32::sin(azimuth);
 
-        Color::new(0.,0.,0.)
+        let hemisphere_vec = Vector3 { x, y, z };
+
+        let (n_t, n_b) = Renderer::create_coordinate_system(&normal);
+
+        let scatter = Vector3 {
+            x: hemisphere_vec.x * n_b.x + hemisphere_vec.y * normal.x + hemisphere_vec.z * n_t.x,
+            y: hemisphere_vec.x * n_b.y + hemisphere_vec.y * normal.y + hemisphere_vec.z * n_t.y,
+            z: hemisphere_vec.x * n_b.z + hemisphere_vec.y * normal.z + hemisphere_vec.z * n_t.z,
+        };
+
+        let weight = 1.0 / scatter.dot(&normal);
+        (scatter, weight)
     }
 
-    fn calculate_direct_light(ray: &Ray, scene: &Scene, intersection_data: &IntersectionData, renderable: &Box<dyn Renderable + Send + 'static>) -> Color {
-        let mut color = Color::new(0.,0.,0.);
+    fn calculate_indirect_light(ray: &Ray, scene: &Scene, intersection_data: &IntersectionData, renderable: &Box<dyn Renderable + Send + 'static>, depth: usize) -> Color {
+        let mut indirect_light = Color::new(0.,0.,0.);
+
+        let range = Uniform::new(0.0, 1.0);
+        let mut rng = rand::thread_rng();
 
         let hit_point = &ray.origin + &(ray.direction * intersection_data.distance);
-        let renderable_normal = intersection_data.normal;
+
+        for n in 0..INDIRECT_RAYS {
+            let r1 = range.sample(&mut rng);
+            let r2 = range.sample(&mut rng);
+
+            let (direction, weight) = Renderer::create_scatter_direction(&intersection_data.normal, r1, r2);
+
+            let indirect_ray = Ray::new(&hit_point + &(direction * 0.0001), direction);
+            let cosine_angle = direction.dot(&intersection_data.normal);
+
+            indirect_light += Renderer::trace(indirect_ray,  &scene, depth + 1) * cosine_angle * weight * PI * r1 * 0.5;
+        }
+
+        indirect_light = indirect_light / (INDIRECT_RAYS * (depth + 1)) as f32;
+
+        indirect_light
+    }
+
+    fn calculate_direct_light(ray: &Ray, scene: &Scene, intersection_data: &IntersectionData, renderable: &Box<dyn Renderable + Send + 'static>) -> f32 {
+        let hit_point = &ray.origin + &(ray.direction * intersection_data.distance);
+        let normal = intersection_data.normal;
         let material = renderable.get_material();
 
         let shadow_point;
-        if ray.direction.dot(&renderable_normal) < 0.0 {
-            shadow_point = &hit_point + &(renderable_normal * 0.0001);
+        if ray.direction.dot(&normal) < 0.0 {
+            shadow_point = &hit_point + &normal;
         } else {
-            shadow_point = &hit_point - &(renderable_normal * 0.0001);
+            shadow_point = &hit_point - &normal;
         }
+
+        let mut diffuse = 0.0;
 
         for light in scene.get_lights() {
             let mut light_direction = &light.position - &hit_point;
             light_direction.normalize();
 
-            let shadow_ray = Ray::new(shadow_point, light_direction,);
+            let shadow_ray = Ray::new(shadow_point, light_direction);
 
             let in_light = match Renderer::check_intersections(&shadow_ray, &scene) {
-                Some(_) => {0.},
-                None => {1.}
+                Some(_) => 0.,
+                None => 1.
             };
 
-            let light_to_normal = f32::max(0., light_direction.dot(&renderable_normal));
+            let light_to_normal = f32::max(0., light_direction.dot(&normal));
 
-            let diffuse = in_light * light.intensity * light_to_normal;
-
-            color += material.diffuse_color * diffuse;
+            diffuse += in_light * light.intensity * light_to_normal;
         }
 
-        color
+        diffuse
     }
 
     fn create_coordinate_system(normal: &Vector3<f32>) -> (Vector3<f32>, Vector3<f32>) {
-        let n_t = if normal.x.abs() > normal.y.abs() {
-            Vector3::new(
-                normal.z,
-                0.0,
-                -normal.x,
-            )
+        let mut n_t = if normal.x.abs() > normal.y.abs() {
+            Vector3::new(normal.z, 0.0, -normal.x)
         } else {
-            Vector3::new (
-                0.0,
-                -normal.z,
-                normal.y,
-            )
-        }.normalize().clone();
+            Vector3::new (0.0, -normal.z, normal.y)
+        };
 
-        let n_b = normal.clone().cross(&n_t).clone();
+        n_t.normalize();
+
+        let mut n_b = normal.clone();
+        n_b.cross(&n_t);
+
         (n_t, n_b)
     }
 
@@ -119,85 +161,44 @@ impl Renderer {
             }
         }
 
-        match result_intersected_data {
-            Some(data) => {
-                return Some((data, &intersected_renderable.unwrap()))
-            },
-            None => return None
+        return match result_intersected_data {
+            Some(data) => Some((data, &intersected_renderable.unwrap())),
+            None => None
         }
     }
 
-    fn uniform_sample_hemisphere(r1: f32, r2: f32) -> Vector3<f32> {
-        // cos(theta) = u1 = y
-        // cos^2(theta) + sin^2(theta) = 1 -> sin(theta) = srtf(1 - cos^2(theta))
-        let sin_theta = (1. - r1 * r1).sqrt();
-        let phi = 2. * PI * r2;
-        let x = sin_theta * phi.cos();
-        let z = sin_theta * phi.cos();
-
-        Vector3::new(x, r1, z)
-    }
-
-    fn trace(ray: Ray, scene: &Scene, depth: &usize) -> Color {
-        if depth > &MAX_DEPTH {
-            return Color::new(0.,0.,0.);
-        }
-
+    fn trace(ray: Ray, scene: &Scene, depth: usize) -> Color {
         let mut pixel_color = Color::new(0.,0.,0.);
+
+        if depth > MAX_DEPTH {
+            return pixel_color;
+        }
 
         match Renderer::check_intersections(&ray, &scene) {
             Some((result_intersected_data, renderable)) => {
                 let direct_light = Renderer::calculate_direct_light(&ray, &scene, &result_intersected_data, &renderable);
-                let mut indirect_light = Color::new(0.,0.,0.);
+                let indirect_light_color = Renderer::calculate_indirect_light(&ray, &scene, &result_intersected_data, &renderable, depth);
 
-
-                let (Nt, Nb) = Renderer::create_coordinate_system(&result_intersected_data.normal);
-                let pdf = 1. / (2. * PI);
-
-                let range = Uniform::new(0.0, 1.0);
-                let mut rng = rand::thread_rng();
-
-                let hit_point = &ray.origin + &(ray.direction * result_intersected_data.distance);
-
-                for n in 0..INDIRECT_RAYS {
-                    let r1 = range.sample(&mut rng);
-                    let r2 = range.sample(&mut rng);
-
-                    let sample = Renderer::uniform_sample_hemisphere(r1, r2);
-
-                    let sample_world = Vector3::new(
-                        sample.x * Nb.x + sample.y * result_intersected_data.normal.x + sample.z * Nt.x,
-                        sample.x * Nb.y + sample.y * result_intersected_data.normal.y + sample.z * Nt.y,
-                        sample.x * Nb.z + sample.y * result_intersected_data.normal.z + sample.z * Nt.z);
-
-//                    // don't forget to divide by PDF and multiply by cos(theta)
-
-                    let indirect_ray = Ray::new(&hit_point + &(sample_world * 0.0001), sample_world);
-                    indirect_light += (Renderer::trace(indirect_ray,  &scene, &(depth + 1)) * r1) / pdf;
-                }
-
-                indirect_light = indirect_light / INDIRECT_RAYS as f32;
-
-
-                pixel_color = (direct_light / PI + &(indirect_light * 2.0 ));
+                let diffuse_color = renderable.get_material().diffuse_color;
+                pixel_color = indirect_light_color + &(diffuse_color * direct_light);
             }
             None => {
-                pixel_color = *scene.get_background();
+                if depth == 0 {
+                    pixel_color = *scene.get_background();
+                }
             }
         }
 
         pixel_color
     }
 
-    pub fn render(&mut self) -> &Vec<u8> {
+    pub fn render(&mut self) -> &Vec<f32> {
         let render_scene = Arc::get_mut(&mut self.render_scene).unwrap();
 
-
-        if self.last_frame_camera_position == render_scene.camera.position {
-            return  &self.render_scene.image;
-        } else { // clear buffer when camera moved;
+        if self.last_frame_camera_position != render_scene.camera.position {
+            self.frames_total = 0;
             self.last_frame_camera_position = render_scene.camera.position;
-            for i in 0..render_scene.image.len() { render_scene.image[i] = 0; }
+            for i in 0..render_scene.image.len() { render_scene.image[i] = 0.; }
         }
 
         let workers_num = self.thread_pool.get_workers_num() as u32;
@@ -209,6 +210,7 @@ impl Renderer {
 
             let width = self.width.clone();
             let height = self.height.clone();
+            let frames_total = self.frames_total.clone();
             let mut render_scene_thread = Arc::clone(&self.render_scene);
 
             let task = move || {
@@ -216,12 +218,22 @@ impl Renderer {
                     for w in 0..width {
                         let offset = (h * width * 3 + w * 3) as usize;
                         let camera_ray = render_scene_thread.camera.get_camera_ray(w, h, width, height);
-                        let color = Renderer::trace(camera_ray, &render_scene_thread.scene, &0).as_u8();
+                        let rendered_color = Renderer::trace(camera_ray, &render_scene_thread.scene, 0);
+
+                        let alpha =  match frames_total {
+                            0 => 1 as f32,
+                            _ => 0.5,
+                        };
+
+                        let r = lerp(render_scene_thread.image[offset], rendered_color.r, alpha);
+                        let g = lerp(render_scene_thread.image[offset + 1], rendered_color.g, alpha);
+                        let b = lerp(render_scene_thread.image[offset + 2], rendered_color.b, alpha);
+
 
                         unsafe {
-                            Arc::get_mut_unchecked(&mut render_scene_thread).image[offset] = color[0];
-                            Arc::get_mut_unchecked(&mut render_scene_thread).image[offset + 1] = color[1];
-                            Arc::get_mut_unchecked(&mut render_scene_thread).image[offset + 2] = color[2];
+                            Arc::get_mut_unchecked(&mut render_scene_thread).image[offset] = r;
+                            Arc::get_mut_unchecked(&mut render_scene_thread).image[offset + 1] = g;
+                            Arc::get_mut_unchecked(&mut render_scene_thread).image[offset + 2] = b;
                         }
                     }
                 }
@@ -230,6 +242,7 @@ impl Renderer {
             self.thread_pool.add_task(Box::new(task));
         }
 
+        self.frames_total += 1;
         self.thread_pool.wait_all();
 
         return &self.render_scene.image;

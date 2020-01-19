@@ -18,20 +18,19 @@ use pathtracer::math::color::Color;
 
 use pathtracer::renderer::camera_controller::CameraController;
 use std::sync::Arc;
+use rand::distributions::{Uniform, Distribution};
 
 pub fn main() {
     let width = 800;
     let height = 600;
 
-    let mut scene = Scene::new(Color::new(0., 233., 255.));
-    let light = Light::new(Color::new(255., 255., 255.), 1.2, Vector3::new(2., 150., 1.));
+    let mut scene = Scene::new(Color::new(255., 255., 255.));
+    let light = Light::new(Color::new(255., 255., 255.), 1.2, Vector3::new(0., 55., 70.));
     scene.add_light(light);
 
-//    scene.load_model(String::from("./assets/cornell_box/CornellBox-Sphere.obj"));
-    scene.load_model(String::from("./assets/chair.obj"));
-    add_test_renderables(&mut scene);
+    scene.load_model(String::from("./assets/cornell_box/default.obj"));
 
-    let camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,5.,25.), Vector3::new(0.,5.,-5.));
+    let camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,30.,80.), Vector3::new(0.,30.,-1.));
     let mut camera_controller = CameraController::new(&camera);
 
     let mut renderer = Renderer::new(width, height, camera, scene);
@@ -76,21 +75,22 @@ pub fn main() {
 }
 
 fn add_test_renderables(scene: &mut Scene) {
-    for i in 0..6 {
+    let range = Uniform::new(1., 255.);
+    let mut rng = rand::thread_rng();
+
+    for i in 0..10 {
         let step = i as f32;
         let mut material = Material::new();
-        material.opacity = 0.65 + 1. / i as f32;
-        material.diffuse_color = Color::new(80.,  10., 15.);
+        material.diffuse_color = Color::new(range.sample(&mut rng),  range.sample(&mut rng), range.sample(&mut rng));
 
         let sphere = Sphere::new(1.5, Vector3::new( -10. + step * 4. , 2., -10.), material);
         scene.add_renderable(Box::new(sphere));
     }
 
-    for i in 0..2 {
+    for i in 0..3 {
         let step = i as f32;
         let mut material = Material::new();
-        material.opacity = 0.95;
-        material.diffuse_color = Color::new(80.,  10., 15.);
+        material.diffuse_color =  Color::new(range.sample(&mut rng),  range.sample(&mut rng), range.sample(&mut rng));
         let sphere = Sphere::new(5.5, Vector3::new( 10. - step * 15. , 15., -8.), material);
         scene.add_renderable(Box::new(sphere));
     }
@@ -101,30 +101,5 @@ fn add_test_renderables(scene: &mut Scene) {
 
         let plane_floor = Plane::new(Vector3::new(0., 0., 0.), plane_material, Vector3::new(0., 1., 0.));
         scene.add_renderable(Box::new(plane_floor));
-    }
-
-
-    {
-//        let mut plane_material = Material::new();
-//        plane_material.diffuse_color = Color::new(10.,  160., 10.);
-//
-//        let plane_top = Plane::new(Vector3::new(0.,0., -50.),  plane_material, Vector3::new(0., 0.,1.));
-//        scene.add_renderable(Box::new(plane_top));
-    }
-
-    {
-//        let mut plane_material = Material::new();
-//        plane_material.diffuse_color = Color::new(120.,  0., 10.);
-//
-//        let plane_behind = Plane::new(Vector3::new(0.,0., 50.),  plane_material, Vector3::new(0., 0.,-1.));
-//        scene.add_renderable(Box::new(plane_behind));
-    }
-
-    {
-//        let mut plane_material = Material::new();
-//        plane_material.diffuse_color = Color::new(10.,  10., 110.);
-//
-//        let plane_left = Plane::new(Vector3::new(50., 0., 0.), plane_material, Vector3::new(-1., 0., 0.));
-//        scene.add_renderable(Box::new(plane_left));
     }
 }

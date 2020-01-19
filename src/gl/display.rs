@@ -26,7 +26,7 @@ impl<'a> Display <'a> {
         Ok(display)
     }
 
-    fn write_image_to_texture(&mut self, image: &Vec<u8>) {
+    fn write_image_to_texture(&mut self, image: &Vec<f32>) {
         let width = self.width as usize;
         let height = self.height as usize;
 
@@ -35,15 +35,15 @@ impl<'a> Display <'a> {
                 for w in 0..width {
                     let offset = h * pitch + w * 3;
 
-                    buffer[offset] = image[offset];
-                    buffer[offset + 1] = image[offset + 1];
-                    buffer[offset + 2] = image[offset + 2];
+                    buffer[offset] = f32::min(image[offset],255.0) as u8;
+                    buffer[offset + 1] = f32::min(image[offset + 1],255.0) as u8;
+                    buffer[offset + 2] = f32::min(image[offset + 2],255.0) as u8;;
                 }
             }
         }).unwrap();
     }
 
-    pub fn show (&mut self, canvas: &mut Canvas<Window>, image: &Vec<u8>) -> Result<(), String> {
+    pub fn show (&mut self, canvas: &mut Canvas<Window>, image: &Vec<f32>) -> Result<(), String> {
         self.write_image_to_texture(&image);
 
         canvas.clear();

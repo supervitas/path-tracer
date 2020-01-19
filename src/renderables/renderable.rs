@@ -11,3 +11,9 @@ pub trait Renderable : Sync {
     fn intersects(&self, ray: &Ray) -> Option<IntersectionData>;
     fn get_material(&self) -> &Material;
 }
+
+impl PartialEq for Box<dyn Renderable + Send> {
+    fn eq(&self, other: &Box<dyn Renderable + Send>) -> bool {
+        self == other
+    }
+}

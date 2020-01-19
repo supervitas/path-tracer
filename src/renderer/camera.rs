@@ -49,9 +49,6 @@ impl Camera {
         direction.apply_matrix(&self.camera_world);
         direction.normalize();
 
-        Ray {
-            origin: self.position,
-            direction
-        }
+        Ray::new(self.position, direction)
     }
 }

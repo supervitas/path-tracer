@@ -28,6 +28,14 @@ impl Color {
     }
 }
 
+impl ops::Add<&f32> for Color {
+    type Output = Color;
+
+    fn add(self, val: &f32) -> Color {
+        Color {r: self.r + val, g: self.g + val, b: self.b + val}
+    }
+}
+
 impl ops::Add<&Color> for Color {
     type Output = Color;
 
