@@ -1,7 +1,6 @@
 use std::fmt;
 use std::ops::{Mul, Add, DivAssign};
 use num::{Float};
-use crate::math::mat4::Matrix4;
 use crate::math::vec3::Vector3;
 
 #[derive(Clone, Copy, Debug)]

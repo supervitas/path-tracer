@@ -10,14 +10,12 @@ use pathtracer::renderer::scene::Scene;
 use pathtracer::gl::display::Display;
 use pathtracer::renderables::material::Material;
 use pathtracer::renderables::sphere::Sphere;
-use pathtracer::gl::obj_loader::load_obj;
 use std::time::{Duration, Instant};
 use pathtracer::renderer::light::Light;
 use pathtracer::renderables::plane::Plane;
 use pathtracer::math::color::Color;
 
 use pathtracer::renderer::camera_controller::CameraController;
-use std::sync::Arc;
 use rand::distributions::{Uniform, Distribution};
 
 pub fn main() {
@@ -30,7 +28,7 @@ pub fn main() {
 
     scene.load_model(String::from("./assets/cornell_box/default.obj"));
 
-    let camera = Camera::new(65., 0.1, 1000., Vector3::new(-10.,35.,55.), Vector3::new(-10.,40.,-1.));
+    let camera = Camera::new(65., Vector3::new(-10.,35.,55.), Vector3::new(-10.,40.,-1.));
     let mut camera_controller = CameraController::new(&camera);
 
     let mut renderer = Renderer::new(width, height, camera, scene);
@@ -69,8 +67,6 @@ pub fn main() {
         display.show(&mut canvas, &image).unwrap();
 
         println!("Render time: {}", now.elapsed().as_millis());
-
-        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
 }
 

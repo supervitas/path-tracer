@@ -2,7 +2,6 @@ extern crate num_cpus;
 
 use std::thread;
 use std::sync::{Arc, Condvar, Mutex};
-use std::sync::mpsc::Sender;
 use std::sync::atomic::{AtomicBool, Ordering, AtomicUsize};
 use std::thread::yield_now;
 use std::collections::VecDeque;

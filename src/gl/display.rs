@@ -37,7 +37,7 @@ impl<'a> Display <'a> {
 
                     buffer[offset] = f32::min(image[offset],255.0) as u8;
                     buffer[offset + 1] = f32::min(image[offset + 1],255.0) as u8;
-                    buffer[offset + 2] = f32::min(image[offset + 2],255.0) as u8;;
+                    buffer[offset + 2] = f32::min(image[offset + 2],255.0) as u8;
                 }
             }
         }).unwrap();

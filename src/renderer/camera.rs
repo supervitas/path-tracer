@@ -7,13 +7,11 @@ pub struct Camera {
     pub target: Vector3<f32>,
     up: Vector3<f32>,
     fov: f32,
-    z_near: f32,
-    z_far: f32,
     camera_world: Matrix4<f32>,
 }
 
 impl Camera {
-    pub fn new(fov: f32, z_near: f32, z_far: f32, position: Vector3<f32>, target: Vector3<f32>) -> Self {
+    pub fn new(fov: f32, position: Vector3<f32>, target: Vector3<f32>) -> Self {
         let up = Vector3::new(0., 1.,0.);
         let pos = &target + &position;
         let mut camera_world:Matrix4<f32> = Matrix4::identity();
@@ -21,8 +19,6 @@ impl Camera {
 
         Camera {
             fov,
-            z_far,
-            z_near,
             position: pos,
             target,
             up,

@@ -4,13 +4,9 @@ use crate::renderer::scene::Scene;
 use crate::renderer::camera::Camera;
 use crate::renderer::thread_pool::ThreadPool;
 use crate::math::ray::Ray;
-use crate::renderer::light::Light;
 use crate::math::color::Color;
-use rand::distributions::{Uniform, Distribution};
 use std::sync::Arc;
 use std::f32::consts::PI;
-use crate::math::lerp;
-use rand::prelude::ThreadRng;
 
 const MAX_DEPTH: usize = 2;
 const INDIRECT_RAYS: usize = 12;
@@ -35,8 +31,6 @@ pub struct Renderer {
 impl Renderer {
     pub fn new(width: u32, height: u32, camera: Camera, scene: Scene) -> Self {
         let image: Vec<f32> = vec![0.; ((width * height) * 3) as usize];
-        let range = Uniform::new(0.0, 1.0);
-        let mut rng: ThreadRng = rand::thread_rng();
 
         Renderer {
             width,
@@ -50,7 +44,7 @@ impl Renderer {
 
     pub fn get_render_camera(&mut self) -> &mut Camera {&mut Arc::get_mut(&mut self.render_scene).unwrap().camera}
 
-    fn create_scatter_direction(normal: &Vector3<f32>, r1: f32, r2: f32) -> (Vector3<f32>, f32) {
+    fn create_scatter_direction(normal: &Vector3<f32>, r1: f32, r2: f32) -> Vector3<f32> {
         let y = r1;
         let azimuth = r2 * 2.0 * PI;
         let sin_elevation = f32::sqrt(1.0 - y * y);
@@ -67,43 +61,35 @@ impl Renderer {
             z: hemisphere_vec.x * n_b.z + hemisphere_vec.y * normal.z + hemisphere_vec.z * n_t.z,
         };
 
-        let weight = 1.0 / scatter.dot(&normal);
-        (scatter, weight)
+        scatter
     }
 
     fn calculate_indirect_light(ray: &Ray, scene: &Scene, intersection_data: &IntersectionData, depth: usize) -> Color {
         let mut indirect_light = Color::new(0.,0.,0.);
 
-        let range = Uniform::new(0.0, 1.0);
-        let mut rng = rand::thread_rng();
-
         let hit_point = &ray.origin + &(ray.direction * intersection_data.distance);
 
         let indirect_count = INDIRECT_RAYS >> depth;
+        for _i in 0..indirect_count {
+            let r1 = rand::random();
+            let r2 = rand::random();
 
-        for n in 0..indirect_count {
-            let r1 = range.sample(&mut rng);
-            let r2 = range.sample(&mut rng);
-
-            let (direction, weight) = Renderer::create_scatter_direction(&intersection_data.normal, r1, r2);
+            let direction = Renderer::create_scatter_direction(&intersection_data.normal, r1, r2);
 
             let indirect_ray = Ray::new(&hit_point + &(direction * 0.0001), direction);
             let cosine_angle = direction.dot(&intersection_data.normal);
 
-            indirect_light += Renderer::trace(indirect_ray,  &scene, depth + 1) * cosine_angle ;
+            indirect_light += Renderer::trace(indirect_ray,  &scene, depth + 1) * cosine_angle;
         }
 
         indirect_light = indirect_light * f32::powf(REFLECTION_FACTOR, depth as f32);
 
-        indirect_light = indirect_light / indirect_count as f32;
-
-        indirect_light
+        return indirect_light / indirect_count as f32;
     }
 
-    fn calculate_direct_light(ray: &Ray, scene: &Scene, intersection_data: &IntersectionData, renderable: &Box<dyn Renderable + Send + 'static>) -> f32 {
+    fn calculate_direct_light(ray: &Ray, scene: &Scene, intersection_data: &IntersectionData) -> f32 {
         let hit_point = &ray.origin + &(ray.direction * intersection_data.distance);
         let normal = intersection_data.normal;
-        let material = renderable.get_material();
 
         let shadow_point;
         if ray.direction.dot(&normal) < 0.0 {
@@ -181,16 +167,14 @@ impl Renderer {
 
         match Renderer::check_intersections(&ray, &scene) {
             Some((result_intersected_data, renderable)) => {
-                let direct_light = Renderer::calculate_direct_light(&ray, &scene, &result_intersected_data, &renderable);
+                let direct_light = Renderer::calculate_direct_light(&ray, &scene, &result_intersected_data);
                 let indirect_light_color = Renderer::calculate_indirect_light(&ray, &scene, &result_intersected_data, depth);
 
                 let diffuse_color = renderable.get_material().diffuse_color;
-                pixel_color = (indirect_light_color + &(diffuse_color * direct_light));
+                pixel_color = indirect_light_color + &(diffuse_color * direct_light);
             }
             None => {
-                if depth == 0 {
-                    pixel_color = *scene.get_background();
-                }
+                pixel_color = *scene.get_background();
             }
         }
 
@@ -227,12 +211,11 @@ impl Renderer {
 
                         let _image = &render_scene_thread.image;
 
-                        let frames = (frames_total as f32 / (frames_total + 1) as f32);
+                        let frames = frames_total as f32 / (frames_total + 1) as f32;
 
                         let r = _image[offset] * frames + (rendered_color.r / (frames_total + 1) as f32);
                         let g = _image[offset + 1] * frames + (rendered_color.g / (frames_total + 1) as f32);
                         let b = _image[offset + 2] * frames + (rendered_color.b / (frames_total + 1) as f32);
-
 
                         unsafe {
                             let image = &mut Arc::get_mut_unchecked(&mut render_scene_thread).image;
