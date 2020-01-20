@@ -30,7 +30,7 @@ pub fn main() {
 
     scene.load_model(String::from("./assets/cornell_box/default.obj"));
 
-    let camera = Camera::new(65., 0.1, 1000., Vector3::new(0.,30.,80.), Vector3::new(0.,30.,-1.));
+    let camera = Camera::new(65., 0.1, 1000., Vector3::new(-10.,35.,55.), Vector3::new(-10.,40.,-1.));
     let mut camera_controller = CameraController::new(&camera);
 
     let mut renderer = Renderer::new(width, height, camera, scene);

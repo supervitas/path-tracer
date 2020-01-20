@@ -12,8 +12,8 @@ use std::f32::consts::PI;
 use crate::math::lerp;
 use rand::prelude::ThreadRng;
 
-const MAX_DEPTH: usize = 2;
-const INDIRECT_RAYS: usize = 64;
+const MAX_DEPTH: usize = 1;
+const INDIRECT_RAYS: usize = 32;
 
 
 struct RenderScene {
@@ -87,7 +87,7 @@ impl Renderer {
             let indirect_ray = Ray::new(&hit_point + &(direction * 0.0001), direction);
             let cosine_angle = direction.dot(&intersection_data.normal);
 
-            indirect_light += Renderer::trace(indirect_ray,  &scene, depth + 1) * cosine_angle * weight * PI * r1 * 0.5;
+            indirect_light += Renderer::trace(indirect_ray,  &scene, depth + 1) * cosine_angle * weight * PI * r1;
         }
 
         indirect_light = indirect_light / (INDIRECT_RAYS * (depth + 1)) as f32;
@@ -102,9 +102,9 @@ impl Renderer {
 
         let shadow_point;
         if ray.direction.dot(&normal) < 0.0 {
-            shadow_point = &hit_point + &normal;
+            shadow_point = &hit_point + &(normal * 0.0001);
         } else {
-            shadow_point = &hit_point - &normal;
+            shadow_point = &hit_point - &(normal* 0.0001);
         }
 
         let mut diffuse = 0.0;
