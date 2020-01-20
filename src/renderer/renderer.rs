@@ -12,8 +12,9 @@ use std::f32::consts::PI;
 use crate::math::lerp;
 use rand::prelude::ThreadRng;
 
-const MAX_DEPTH: usize = 1;
-const INDIRECT_RAYS: usize = 32;
+const MAX_DEPTH: usize = 2;
+const INDIRECT_RAYS: usize = 12;
+const REFLECTION_FACTOR: f32 = 0.17;
 
 
 struct RenderScene {
@@ -70,7 +71,7 @@ impl Renderer {
         (scatter, weight)
     }
 
-    fn calculate_indirect_light(ray: &Ray, scene: &Scene, intersection_data: &IntersectionData, renderable: &Box<dyn Renderable + Send + 'static>, depth: usize) -> Color {
+    fn calculate_indirect_light(ray: &Ray, scene: &Scene, intersection_data: &IntersectionData, depth: usize) -> Color {
         let mut indirect_light = Color::new(0.,0.,0.);
 
         let range = Uniform::new(0.0, 1.0);
@@ -78,7 +79,9 @@ impl Renderer {
 
         let hit_point = &ray.origin + &(ray.direction * intersection_data.distance);
 
-        for n in 0..INDIRECT_RAYS {
+        let indirect_count = INDIRECT_RAYS >> depth;
+
+        for n in 0..indirect_count {
             let r1 = range.sample(&mut rng);
             let r2 = range.sample(&mut rng);
 
@@ -87,10 +90,12 @@ impl Renderer {
             let indirect_ray = Ray::new(&hit_point + &(direction * 0.0001), direction);
             let cosine_angle = direction.dot(&intersection_data.normal);
 
-            indirect_light += Renderer::trace(indirect_ray,  &scene, depth + 1) * cosine_angle * weight * PI * r1;
+            indirect_light += Renderer::trace(indirect_ray,  &scene, depth + 1) * cosine_angle ;
         }
 
-        indirect_light = indirect_light / (INDIRECT_RAYS * (depth + 1)) as f32;
+        indirect_light = indirect_light * f32::powf(REFLECTION_FACTOR, depth as f32);
+
+        indirect_light = indirect_light / indirect_count as f32;
 
         indirect_light
     }
@@ -177,10 +182,10 @@ impl Renderer {
         match Renderer::check_intersections(&ray, &scene) {
             Some((result_intersected_data, renderable)) => {
                 let direct_light = Renderer::calculate_direct_light(&ray, &scene, &result_intersected_data, &renderable);
-                let indirect_light_color = Renderer::calculate_indirect_light(&ray, &scene, &result_intersected_data, &renderable, depth);
+                let indirect_light_color = Renderer::calculate_indirect_light(&ray, &scene, &result_intersected_data, depth);
 
                 let diffuse_color = renderable.get_material().diffuse_color;
-                pixel_color = indirect_light_color + &(diffuse_color * direct_light);
+                pixel_color = (indirect_light_color + &(diffuse_color * direct_light));
             }
             None => {
                 if depth == 0 {
@@ -220,20 +225,21 @@ impl Renderer {
                         let camera_ray = render_scene_thread.camera.get_camera_ray(w, h, width, height);
                         let rendered_color = Renderer::trace(camera_ray, &render_scene_thread.scene, 0);
 
-                        let alpha =  match frames_total {
-                            0 => 1 as f32,
-                            _ => 0.5,
-                        };
+                        let _image = &render_scene_thread.image;
 
-                        let r = lerp(render_scene_thread.image[offset], rendered_color.r, alpha);
-                        let g = lerp(render_scene_thread.image[offset + 1], rendered_color.g, alpha);
-                        let b = lerp(render_scene_thread.image[offset + 2], rendered_color.b, alpha);
+                        let frames = (frames_total as f32 / (frames_total + 1) as f32);
+
+                        let r = _image[offset] * frames + (rendered_color.r / (frames_total + 1) as f32);
+                        let g = _image[offset + 1] * frames + (rendered_color.g / (frames_total + 1) as f32);
+                        let b = _image[offset + 2] * frames + (rendered_color.b / (frames_total + 1) as f32);
 
 
                         unsafe {
-                            Arc::get_mut_unchecked(&mut render_scene_thread).image[offset] = r;
-                            Arc::get_mut_unchecked(&mut render_scene_thread).image[offset + 1] = g;
-                            Arc::get_mut_unchecked(&mut render_scene_thread).image[offset + 2] = b;
+                            let image = &mut Arc::get_mut_unchecked(&mut render_scene_thread).image;
+
+                            image[offset] = r;
+                            image[offset + 1] = g;
+                            image[offset + 2] = b;
                         }
                     }
                 }
