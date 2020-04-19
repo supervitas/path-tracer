@@ -16,7 +16,6 @@ use pathtracer::renderables::plane::Plane;
 use pathtracer::math::color::Color;
 
 use pathtracer::renderer::camera_controller::CameraController;
-use rand::distributions::{Uniform, Distribution};
 
 pub fn main() {
     let width = 800;
@@ -67,35 +66,5 @@ pub fn main() {
         display.show(&mut canvas, &image).unwrap();
 
         println!("Render time: {}", now.elapsed().as_millis());
-    }
-}
-
-fn add_test_renderables(scene: &mut Scene) {
-    let range = Uniform::new(1., 255.);
-    let mut rng = rand::thread_rng();
-
-    for i in 0..10 {
-        let step = i as f32;
-        let mut material = Material::new();
-        material.diffuse_color = Color::new(range.sample(&mut rng),  range.sample(&mut rng), range.sample(&mut rng));
-
-        let sphere = Sphere::new(1.5, Vector3::new( -10. + step * 4. , 2., -10.), material);
-        scene.add_renderable(Box::new(sphere));
-    }
-
-    for i in 0..3 {
-        let step = i as f32;
-        let mut material = Material::new();
-        material.diffuse_color =  Color::new(range.sample(&mut rng),  range.sample(&mut rng), range.sample(&mut rng));
-        let sphere = Sphere::new(5.5, Vector3::new( 10. - step * 15. , 15., -8.), material);
-        scene.add_renderable(Box::new(sphere));
-    }
-
-    {
-        let mut plane_material = Material::new();
-        plane_material.diffuse_color = Color::new(100., 100., 100.0);
-
-        let plane_floor = Plane::new(Vector3::new(0., 0., 0.), plane_material, Vector3::new(0., 1., 0.));
-        scene.add_renderable(Box::new(plane_floor));
     }
 }

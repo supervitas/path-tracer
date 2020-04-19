@@ -9,9 +9,8 @@ use std::sync::Arc;
 use std::f32::consts::PI;
 
 const MAX_DEPTH: usize = 2;
-const INDIRECT_RAYS: usize = 12;
+const INDIRECT_RAYS: usize = 2;
 const REFLECTION_FACTOR: f32 = 0.17;
-
 
 struct RenderScene {
     camera: Camera,
@@ -69,7 +68,7 @@ impl Renderer {
 
         let hit_point = &ray.origin + &(ray.direction * intersection_data.distance);
 
-        let indirect_count = INDIRECT_RAYS >> depth;
+        let indirect_count = usize::max(INDIRECT_RAYS >> depth, 1);
         for _i in 0..indirect_count {
             let r1 = rand::random();
             let r2 = rand::random();

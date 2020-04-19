@@ -35,7 +35,6 @@ impl <T: Float> Spherical <T> where T: Float + DivAssign {
     }
 }
 
-
 impl <T: Float> PartialEq for Spherical<T> {
     fn eq(&self, other: &Spherical<T>) -> bool {
         self.radius == other.radius && self.polar_angle == other.polar_angle && self.azimuth_angle == other.azimuth_angle
