@@ -11,6 +11,7 @@ use std::f32::consts::PI;
 const MAX_DEPTH: usize = 2;
 const INDIRECT_RAYS: usize = 2;
 const REFLECTION_FACTOR: f32 = 0.17;
+const EPS: f32 = 0.0001;
 
 struct RenderScene {
     camera: Camera,
@@ -86,21 +87,20 @@ impl Renderer {
         return indirect_light / indirect_count as f32;
     }
 
-    fn calculate_direct_light(ray: &Ray, scene: &Scene, intersection_data: &IntersectionData) -> f32 {
-        let hit_point = &ray.origin + &(ray.direction * intersection_data.distance);
+    fn calculate_direct_light(ray: &Ray, scene: &Scene, hit_point: &Vector3<f32>, intersection_data: &IntersectionData) -> f32 {
         let normal = intersection_data.normal;
 
         let shadow_point;
         if ray.direction.dot(&normal) < 0.0 {
-            shadow_point = &hit_point + &(normal * 0.0001);
+            shadow_point = hit_point + &(normal * EPS);
         } else {
-            shadow_point = &hit_point - &(normal* 0.0001);
+            shadow_point = hit_point - &(normal* EPS);
         }
 
         let mut diffuse = 0.0;
 
         for light in scene.get_lights() {
-            let mut light_direction = &light.position - &hit_point;
+            let mut light_direction = &light.position - hit_point;
             light_direction.normalize();
 
             let shadow_ray = Ray::new(shadow_point, light_direction);
@@ -131,6 +131,13 @@ impl Renderer {
         n_b.cross(&n_t);
 
         (n_t, n_b)
+    }
+
+    fn create_reflection_ray(normal: &Vector3<f32>, incident: &Vector3<f32>, intersection: &Vector3<f32>) -> Ray {
+        Ray {
+            origin: intersection + &(*normal * EPS),
+            direction: incident - &(*normal  * 2.0 * incident.clone().dot(&normal)),
+        }
     }
 
     fn check_intersections<'a>(ray: &Ray, scene: &'a Scene) -> Option<(IntersectionData, &'a Box<dyn Renderable + Send + 'static>)> {
@@ -166,11 +173,22 @@ impl Renderer {
 
         match Renderer::check_intersections(&ray, &scene) {
             Some((result_intersected_data, renderable)) => {
-                let direct_light = Renderer::calculate_direct_light(&ray, &scene, &result_intersected_data);
+                let hit_point = &ray.origin + &(ray.direction * result_intersected_data.distance);
+
+                let direct_light = Renderer::calculate_direct_light(&ray, &scene, &hit_point,&result_intersected_data);
                 let indirect_light_color = Renderer::calculate_indirect_light(&ray, &scene, &result_intersected_data, depth);
 
-                let diffuse_color = renderable.get_material().diffuse_color;
+                let material = renderable.get_material();
+
+                let diffuse_color = material.diffuse_color;
                 pixel_color = indirect_light_color + &(diffuse_color * direct_light);
+
+                if material.reflectivity > 0. {
+                    let reflection_ray = Renderer::create_reflection_ray(&result_intersected_data.normal, &ray.direction, &hit_point);
+                    let reflection = Renderer::trace(reflection_ray, &scene, depth + 1) * material.reflectivity;
+                    pixel_color = pixel_color * (1.0 - material.reflectivity);
+                    pixel_color += reflection;
+                }
             }
             None => {
                 pixel_color = *scene.get_background();
